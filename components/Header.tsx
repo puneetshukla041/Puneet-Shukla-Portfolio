@@ -12,9 +12,20 @@ interface MenuItem {
   href: string;
 }
 
+// ⬇⬇ FIX — moved Path OUTSIDE so build does NOT fail
+export const Path = (props: SVGMotionProps<SVGPathElement>) => (
+  <motion.path
+    fill="transparent"
+    strokeWidth="2.5"
+    stroke="white"
+    strokeLinecap="round"
+    {...props}
+  />
+);
+
 const Header = () => {
   const router = useRouter();
-  const pathname = usePathname(); // ← path from router (no manual tracking needed)
+  const pathname = usePathname();
 
   const [isToggled, setIsToggled] = useState(false);
   const [sticky, setSticky] = useState(false);
@@ -23,7 +34,7 @@ const Header = () => {
 
   const lastScrollY = useRef(0);
 
-  // ScrollSpy (only content page)
+  // Scroll spy
   useEffect(() => {
     if (!pathname?.includes('/content')) return;
 
@@ -31,18 +42,15 @@ const Header = () => {
       { id: 'section-1', name: 'Home' },
       { id: 'section-2', name: 'Gallery' },
       { id: 'section-3', name: 'Films' },
-      { id: 'section-4', name: 'Films' },
-      { id: 'section-5', name: 'Contact Us' }
+      { id: 'section-5', name: 'Contact Us' },
     ];
 
     const handleScrollSpy = () => {
-      const scrollPosition = window.scrollY + 150;
+      const scrollPosition = window.scrollY + 120;
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (!el) continue;
-        const top = el.offsetTop;
-        const bottom = top + el.offsetHeight;
-        if (scrollPosition >= top && scrollPosition < bottom) {
+        if (scrollPosition >= el.offsetTop && scrollPosition < el.offsetTop + el.offsetHeight) {
           setActiveSection(section.name);
         }
       }
@@ -58,9 +66,8 @@ const Header = () => {
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
           setSticky(window.scrollY > 20);
-          lastScrollY.current = window.scrollY;
           ticking = false;
         });
         ticking = true;
@@ -70,30 +77,23 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Toggle Developer ↔ Content
+  // Toggle mode
   const handleToggle = () => {
     const goTo = pathname?.includes('/developer') ? '/content' : '/developer';
     setIsToggled(prev => !prev);
-    setTimeout(() => router.push(goTo), 400);
+    setTimeout(() => router.push(goTo), 350);
   };
 
-  // Mobile + Scroll anchor handler
-  const handleLinkClick = (e: React.MouseEvent, item: MenuItem) => {
+  // Anchor links on content page
+  const handleLinkClick = (e: any, item: MenuItem) => {
     if (item.href.startsWith('#')) {
       e.preventDefault();
-      const id = item.href.replace('#', '');
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        setActiveSection(item.title);
-      }
+      const el = document.getElementById(item.href.substring(1));
+      el?.scrollIntoView({ behavior: 'smooth' });
+      setActiveSection(item.title);
     }
     setMobileMenuOpen(false);
   };
-
-  const Path = (props: SVGMotionProps<SVGPathElement>) => (
-    <motion.path fill="transparent" strokeWidth="2.5" stroke="white" strokeLinecap="round" {...props} />
-  );
 
   const developerMenuItems: MenuItem[] = [
     { title: 'Home', href: '/' },
@@ -119,57 +119,49 @@ const Header = () => {
 
   return (
     <>
-      {/* DESKTOP HEADER */}
+      {/* DESKTOP */}
       <motion.header
         initial={{ y: 0 }}
         animate={{
-          y: 0,
-          backgroundColor: sticky ? 'rgba(0, 0, 0, 0.6)' : 'transparent',
-          backdropFilter: sticky ? 'blur(12px)' : 'none',
-          borderBottom: sticky ? '1px solid rgba(255,255,255,0.05)' : '1px solid transparent',
+          backgroundColor: sticky ? 'rgba(0,0,0,0.6)' : 'transparent',
+          backdropFilter: sticky ? 'blur(12px)' : 'none'
         }}
         transition={{ duration: 0.4 }}
         className="hidden md:block fixed top-0 left-0 right-0 z-50"
       >
         <div className="max-w-7xl mx-auto px-6 h-[70px] flex items-center justify-between">
 
-          <Link href="/" className="relative">
-            <Image src="/images/logo.png" alt="Logo" width={150} height={40} className="h-10 w-auto object-contain" priority />
+          <Link href="/">
+            <Image src="/images/logo.png" alt="Logo" width={150} height={40} className="h-10" priority />
           </Link>
 
-          {/* NAV */}
-          <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-1/2">
+          <div className="absolute left-1/2 -translate-x-1/2">
             <div className="flex items-center space-x-1 bg-white/5 border border-white/10 backdrop-blur-md px-3 py-1.5 rounded-full">
-              {currentMenuItems.map((item) => {
-                const active = isItemActive(item);
-                return (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    onClick={(e) => handleLinkClick(e, item)}
-                    className={`relative px-5 py-2 rounded-full text-sm font-medium transition ${
-                      active ? "text-white" : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    {active && (
-                      <motion.div
-                        layoutId="nav-pill"
-                        className="absolute inset-0 bg-white/10 rounded-full"
-                        transition={{ type: "spring", bounce: 0.25, duration: 0.55 }}
-                      />
-                    )}
-                    <span className="relative z-10">{item.title}</span>
-                  </Link>
-                );
-              })}
+              {currentMenuItems.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  onClick={(e) => handleLinkClick(e, item)}
+                  className={`relative px-5 py-2 rounded-full text-sm font-medium ${
+                    isItemActive(item) ? 'text-white' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {isItemActive(item) && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 bg-white/10 rounded-full"
+                    />
+                  )}
+                  <span className="relative z-10">{item.title}</span>
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* TOGGLE */}
           <div className="flex items-center gap-3 bg-black/20 backdrop-blur-sm rounded-full p-1 pl-4 border border-white/5">
             <AnimatePresence mode="wait">
               <motion.span
-                key={pathname?.includes('/developer') ? "dev" : "content"}
+                key={pathname?.includes('/developer') ? 'dev' : 'content'}
                 initial={{ y: 5, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -5, opacity: 0 }}
@@ -184,9 +176,8 @@ const Header = () => {
               className={`w-12 h-7 rounded-full p-1 transition ${isToggled ? 'bg-blue-600/90' : 'bg-white/10'}`}
             >
               <motion.div
-                className="w-5 h-5 bg-white rounded-full shadow flex items-center justify-center"
+                className="w-5 h-5 bg-white rounded-full"
                 animate={{ x: isToggled ? 20 : 0 }}
-                transition={{ type: "spring", stiffness: 520, damping: 30 }}
               >
                 {isToggled ? <Code2 size={10} className="text-blue-600" /> : <Palette size={10} className="text-gray-600" />}
               </motion.div>
@@ -195,17 +186,17 @@ const Header = () => {
         </div>
       </motion.header>
 
-      {/* MOBILE HEADER */}
+      {/* MOBILE */}
       <div className="md:hidden">
         <motion.header
           className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center"
           animate={{
             backgroundColor: (sticky || mobileMenuOpen) ? 'rgba(0,0,0,0.8)' : 'transparent',
-            backdropFilter: (sticky || mobileMenuOpen) ? 'blur(16px)' : 'none',
+            backdropFilter: (sticky || mobileMenuOpen) ? 'blur(16px)' : 'none'
           }}
         >
-          <Link href="/" className="relative">
-            <Image src="/images/logo.png" alt="Logo" width={120} height={32} className="h-8 w-auto object-contain" />
+          <Link href="/">
+            <Image src="/images/logo.png" alt="Logo" width={120} height={32} className="h-8" />
           </Link>
 
           <button onClick={() => setMobileMenuOpen(prev => !prev)} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
@@ -219,10 +210,15 @@ const Header = () => {
 
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-28 px-6 pb-10 flex flex-col">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-28 px-6 pb-10 flex flex-col"
+            >
               <nav className="flex flex-col space-y-4">
                 {currentMenuItems.map((item, idx) => (
-                  <motion.div key={idx} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 + idx * 0.05 }}>
+                  <motion.div key={idx} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
                     <Link
                       href={item.href}
                       onClick={(e) => handleLinkClick(e, item)}
@@ -231,13 +227,12 @@ const Header = () => {
                       }`}
                     >
                       <span className={`text-xl font-medium ${isItemActive(item) ? 'text-white' : 'text-white/70'}`}>{item.title}</span>
-                      <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white group-hover:translate-x-1 transition" />
+                      <ChevronRight className="w-5 h-5 text-white/30" />
                     </Link>
                   </motion.div>
                 ))}
               </nav>
 
-              {/* Toggle */}
               <div className="mt-auto space-y-6">
                 <button onClick={handleToggle} className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-3">
@@ -248,15 +243,14 @@ const Header = () => {
                       {pathname?.includes('/developer') ? "Turn on Content Mode" : "Turn on Developer Mode"}
                     </div>
                   </div>
-
                   <div className={`w-12 h-6 rounded-full p-1 ${isToggled ? 'bg-blue-600' : 'bg-white/20'}`}>
-                    <motion.div className="w-4 h-4 bg-white rounded-full" animate={{ x: isToggled ? 24 : 0 }} transition={{ type: "spring", stiffness: 400, damping: 25 }} />
+                    <motion.div className="w-4 h-4 bg-white rounded-full" animate={{ x: isToggled ? 24 : 0 }} />
                   </div>
                 </button>
 
                 <div className="pt-4 flex justify-center gap-8 border-t border-white/10">
                   {[{ Icon: Instagram, href: "https://instagram.com" }, { Icon: Linkedin, href: "https://linkedin.com" }, { Icon: Github, href: "https://github.com" }].map((s, i) => (
-                    <a key={i} href={s.href} target="_blank" className="text-white/60 hover:text-white hover:scale-110 transition">
+                    <a key={i} href={s.href} target="_blank" className="text-white/60 hover:text-white">
                       <s.Icon size={24} strokeWidth={1.5} />
                     </a>
                   ))}
