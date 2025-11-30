@@ -3,28 +3,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Terminal, Play, FileJson, CheckCircle2, Loader2, 
+  Play, FileJson, CheckCircle2, Loader2, 
   Search, GitGraph, Files, Settings, MoreHorizontal, 
-  X, Minus, ChevronRight, ChevronDown, Command,
+  X, Minus, ChevronRight, ChevronDown, 
   Hash, LayoutTemplate, Bug, Menu, AlertCircle, ArrowDown, ArrowRight
 } from 'lucide-react';
 
-const Section1 = () => {
-  // --- State Management ---
-  const [activeTab, setActiveTab] = useState<'developer.ts' | 'styles.css' | 'README.md'>('developer.ts');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [buildStep, setBuildStep] = useState(0); // 0: Idle, 1: Building, 2: Success
-  const [typedCode, setTypedCode] = useState(''); 
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
-  
-  const scrollRef = useRef<HTMLDivElement>(null);
+// Define strict type for tabs
+type TabName = 'developer.ts' | 'styles.css' | 'README.md';
 
-  // --- File Content ---
-  const files = {
-    'developer.ts': `const developer = {
+// Static content moved outside component to avoid re-creation on render
+const FILES_CONTENT: Record<TabName, string> = {
+  'developer.ts': `const developer = {
   name: "Puneet Shukla",
   role: "Software Developer",
   expertise: "TypeScript & Next.js Expert",
@@ -44,8 +34,8 @@ const Section1 = () => {
 };
 
 export default developer;`,
-    
-    'styles.css': `.portfolio-container {
+  
+  'styles.css': `.portfolio-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -59,7 +49,7 @@ export default developer;`,
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }`,
 
-    'README.md': `# Developer Portfolio
+  'README.md': `# Developer Portfolio
 
 ## Introduction
 I am a software developer with a strong focus on TypeScript and Next.js.
@@ -71,14 +61,28 @@ I am a software developer with a strong focus on TypeScript and Next.js.
 
 ## Action
 Click the "Run Build" button to compile my portfolio.`
-  };
+};
+
+const Section1 = () => {
+  // --- State Management ---
+  const [activeTab, setActiveTab] = useState<TabName>('developer.ts');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [buildStep, setBuildStep] = useState(0); // 0: Idle, 1: Building, 2: Success
+  const [typedCode, setTypedCode] = useState(''); 
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // --- Typing Effect ---
   useEffect(() => {
+    // If we are on the main file and haven't run the build yet, type it out
     if (activeTab === 'developer.ts' && !isRunning) {
       setIsTypingComplete(false);
       let i = 0;
-      const code = files['developer.ts'];
+      const code = FILES_CONTENT['developer.ts'];
       setTypedCode('');
       
       const interval = setInterval(() => {
@@ -92,10 +96,11 @@ Click the "Run Build" button to compile my portfolio.`
 
       return () => clearInterval(interval);
     } else {
-      setTypedCode(files[activeTab]);
+      // For other files, just show content immediately
+      setTypedCode(FILES_CONTENT[activeTab]);
       setIsTypingComplete(true);
     }
-  }, [activeTab]);
+  }, [activeTab, isRunning]); // Added isRunning to dependencies
 
   // Auto-scroll terminal
   useEffect(() => {
@@ -225,13 +230,13 @@ Click the "Run Build" button to compile my portfolio.`
             <ChevronDown size={14} /> <span>PORTFOLIO</span>
           </div>
           {[
-            { name: 'developer.ts', icon: FileJson, color: 'text-[#f1e05a]' },
-            { name: 'styles.css', icon: Hash, color: 'text-[#569cd6]' },
-            { name: 'README.md', icon: LayoutTemplate, color: 'text-[#cccccc]' }
+            { name: 'developer.ts' as TabName, icon: FileJson, color: 'text-[#f1e05a]' },
+            { name: 'styles.css' as TabName, icon: Hash, color: 'text-[#569cd6]' },
+            { name: 'README.md' as TabName, icon: LayoutTemplate, color: 'text-[#cccccc]' }
           ].map((file) => (
             <div 
               key={file.name}
-              onClick={() => setActiveTab(file.name as any)}
+              onClick={() => setActiveTab(file.name)}
               className={`pl-8 py-1.5 flex items-center gap-2 cursor-pointer transition-colors border-l-2 
                 ${activeTab === file.name 
                   ? 'bg-[#37373d] text-white border-[#007acc]' 
@@ -253,10 +258,10 @@ Click the "Run Build" button to compile my portfolio.`
              <Menu size={16} />
            </div>
 
-           {['developer.ts', 'styles.css', 'README.md'].map((tabName) => (
+           {(['developer.ts', 'styles.css', 'README.md'] as TabName[]).map((tabName) => (
              <div 
                key={tabName}
-               onClick={() => setActiveTab(tabName as any)}
+               onClick={() => setActiveTab(tabName)}
                className={`flex items-center gap-2 px-3 h-full text-[13px] cursor-pointer border-r border-[#333] min-w-fit transition-colors
                  ${activeTab === tabName 
                    ? 'bg-[#1e1e1e] text-white border-t-2 border-t-[#007acc]' 
@@ -297,7 +302,7 @@ Click the "Run Build" button to compile my portfolio.`
               transition={{ duration: 0.2 }}
             >
               <CodeRenderer 
-                code={activeTab === 'developer.ts' ? typedCode : files[activeTab]} 
+                code={activeTab === 'developer.ts' ? typedCode : FILES_CONTENT[activeTab]} 
                 lang={activeTab.split('.')[1]} 
               />
               {activeTab === 'developer.ts' && !isRunning && (
@@ -312,7 +317,7 @@ Click the "Run Build" button to compile my portfolio.`
 
           <div className="hidden lg:block w-24 bg-[#050505] border-l border-[#222] overflow-hidden opacity-50 select-none pointer-events-none">
              <div className="transform scale-[0.15] origin-top-left p-4">
-                <CodeRenderer code={files[activeTab]} lang={activeTab.split('.')[1]} />
+                <CodeRenderer code={FILES_CONTENT[activeTab]} lang={activeTab.split('.')[1]} />
              </div>
           </div>
         </div>
