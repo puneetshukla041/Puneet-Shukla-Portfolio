@@ -1,322 +1,279 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Instagram, Linkedin, MapPin, Send, Loader2, CheckCircle2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Volume2, VolumeX, Clapperboard, Award } from 'lucide-react';
 
 const Section5 = () => {
-  const [formState, setFormState] = useState({ name: '', email: '', type: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-  const [isFocused, setIsFocused] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [showIntro, setShowIntro] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const projectTypes = ['Brand Film', 'Music Video', 'Corporate', 'Photography', 'Other'];
+  // ---------------------------------------------------------------------------
+  // 1. LOADING ALGORITHM
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return 90;
+        }
+        return prev + Math.floor(Math.random() * 15) + 1;
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleFocus = (field: string) => setIsFocused(field);
-  const handleBlur = () => setIsFocused('');
+  // ---------------------------------------------------------------------------
+  // 2. INTRO SEQUENCE LOGIC
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!isLoading) {
+      const startTimer = setTimeout(() => {
+        setShowIntro(true);
+      }, 3000);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic Validation simulation
-    if (!formState.name || !formState.email) return;
+      const endTimer = setTimeout(() => {
+        setShowIntro(false);
+      }, 6000);
 
-    setStatus('loading');
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(endTimer);
+      };
+    }
+  }, [isLoading]);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setStatus('success');
-      // Reset form logic would go here if you wanted them to submit again later
-    }, 2000);
-  };
+  const handleVideoLoad = () => {
+    if (videoRef.current) {
+        videoRef.current.defaultMuted = false;
+    }
+    setProgress(100);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
 
-  return (
-    <section id="section-5" className="relative w-full min-h-screen bg-neutral-950 text-white flex flex-col justify-between pt-24 sm:pt-40 pb-12 overflow-hidden">
-      
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-          className="absolute top-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-yellow-600/5 rounded-full blur-[120px]" 
-        />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-neutral-800/10 rounded-full blur-[100px]" />
-      </div>
+  // ---------------------------------------------------------------------------
+  // 3. AGGRESSIVE SOUND-ON PLAYBACK LOGIC (Wrapped in useCallback)
+  // ---------------------------------------------------------------------------
+  const attemptPlay = useCallback(async () => {
+    if (videoRef.current) {
+      try {
+        // FORCE sound settings every time we try to play
+        videoRef.current.volume = 1.0;
+        videoRef.current.muted = false; 
+        
+        await videoRef.current.play();
+        setIsMuted(false); // Success: Sound is ON
+      } catch { // Fixed: Empty catch block to ignore unused error variable
+        console.log("Browser blocked unmuted autoplay. Falling back to muted.");
+        // Fallback: Mute and play so the video doesn't freeze
+        if (videoRef.current) {
+            videoRef.current.muted = true;
+            await videoRef.current.play();
+            setIsMuted(true); 
+        }
+      }
+    }
+  }, []);
 
-      <div className="container mx-auto px-4 sm:px-6 relative z-10 flex-grow">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-32">
-          
-          {/* ---------------- LEFT: THE STATEMENT ---------------- */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full lg:w-1/2 space-y-12 sm:space-y-16"
-          >
-            
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  whileInView={{ width: 48 }}
-                  transition={{ delay: 0.3, duration: 0.8 }}
-                  className="h-[1px] bg-yellow-600"
-                />
-                <span className="text-xs font-bold tracking-[0.4em] text-neutral-500 uppercase">
-                  Contact
-                </span>
-              </div>
-              <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
-                Let&apos;s Create <br /> {/* FIX: Escaped the apostrophe */}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-neutral-500 to-neutral-700">
-                  Something Iconic
-                </span>
-              </h2>
-            </div>
+  const pauseVideo = useCallback(() => {
+    if (videoRef.current && !videoRef.current.paused) {
+        videoRef.current.pause();
+    }
+  }, []);
 
-            <div className="space-y-8">
-              <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md">
-                Available for commissions worldwide. <span className="text-white font-medium">Puneet Shukla Films</span> specializes in high-end visual storytelling, cinematic direction, and editorial photography.
-              </p>
-              
-              <div className="flex flex-col gap-6">
-                 {/* Email Block */}
-                 <a href="mailto:puneetshukla041@gmail.com" className="group flex items-center gap-4 sm:gap-6 p-4 sm:p-6 border border-neutral-800 hover:border-yellow-600/30 hover:bg-yellow-900/5 transition-all duration-500 rounded-sm">
-                    <div className="p-3 bg-neutral-900 rounded-full group-hover:scale-110 transition-transform duration-500">
-                      <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-300 group-hover:text-yellow-500 transition-colors" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <span className="block text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Email Me Directly</span>
-                      <span className="text-base sm:text-xl font-medium text-white group-hover:text-yellow-500 transition-colors break-all">puneetshukla041@gmail.com</span>
-                    </div>
-                 </a>
+  // ---------------------------------------------------------------------------
+  // 4. INTERSECTION OBSERVER (Scroll Detection)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (isLoading) return; 
 
-                 {/* Location Block */}
-                 <div className="flex items-center gap-4 sm:gap-6 p-4 sm:p-6 border border-neutral-800 rounded-sm">
-                    <div className="p-3 bg-neutral-900 rounded-full">
-                      <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-300" />
-                    </div>
-                    <div>
-                      <span className="block text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Based In</span>
-                      <span className="text-lg sm:text-xl font-medium text-white">Gurugram, India</span>
-                    </div>
-                 </div>
-              </div>
-            </div>
+    // Copy ref value to a constant variable inside the effect body (for cleanup safety)
+    const currentSectionRef = sectionRef.current;
+    
+    const observer = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting) {
+                // User sees the section -> FORCE PLAY WITH SOUND
+                attemptPlay();
+            } else {
+                // User scrolled away -> PAUSE
+                pauseVideo();
+            }
+        },
+        { threshold: 0.5 } 
+    );
 
-            {/* Socials Grid */}
-            <div className="pt-8 border-t border-neutral-900">
-              <span className="block text-xs uppercase tracking-widest text-neutral-600 mb-6">Follow The Journey</span>
-              <div className="flex gap-4 sm:gap-8">
-                {[
-                  { icon: Instagram, label: 'Instagram', link: '#' },
-                  { icon: Linkedin, label: 'LinkedIn', link: '#' }
-                ].map((social, idx) => (
-                  <a 
-                    key={idx} 
-                    href={social.link} 
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex flex-col items-center gap-2 cursor-pointer"
-                  >
-                    <div className="p-3 sm:p-4 border border-neutral-800 rounded-full group-hover:border-white group-hover:bg-white transition-all duration-300">
-                      <social.icon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 group-hover:text-black transition-colors" />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
+    if (currentSectionRef) {
+        observer.observe(currentSectionRef);
+    }
 
-          </motion.div>
+    return () => {
+        if (currentSectionRef) {
+            // Use the local variable in the cleanup function
+            observer.unobserve(currentSectionRef);
+        }
+    };
+    // Dependencies are stable functions (useCallback) and state (isLoading)
+  }, [isLoading, attemptPlay, pauseVideo]); 
 
-          {/* ---------------- RIGHT: THE FORM (ANIMATED CONTAINER) ---------------- */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="w-full lg:w-1/2 bg-neutral-900/30 border border-neutral-800 backdrop-blur-md rounded-sm min-h-[600px] relative overflow-hidden flex flex-col"
-          >
-             <AnimatePresence mode="wait">
-                 {status === 'success' ? (
-                    /* SUCCESS STATE */
-                    <motion.div
-                     key="success"
-                     initial={{ opacity: 0, scale: 0.95 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     exit={{ opacity: 0 }}
-                     transition={{ duration: 0.5, ease: "circOut" }}
-                     className="flex-grow flex flex-col items-center justify-center text-center p-12 space-y-6"
-                    >
-                      <motion.div 
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", damping: 12, stiffness: 100, delay: 0.2 }}
-                        className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-4"
-                      >
-                         <CheckCircle2 className="w-10 h-10 text-green-500" />
-                      </motion.div>
-                      <h3 className="text-3xl font-light text-white">Message Received</h3>
-                      <p className="text-neutral-400 max-w-xs leading-relaxed">
-                        Thank you for reaching out, <span className="text-white font-medium capitalize">{formState.name}</span>. We will review your project details and get back to you shortly.
-                      </p>
-                      <button 
-                        onClick={() => { setStatus('idle'); setFormState({ name: '', email: '', type: '', message: '' })}}
-                        className="mt-8 text-xs uppercase tracking-widest text-neutral-500 hover:text-white transition-colors"
-                      >
-                        Send Another Message
-                      </button>
-                    </motion.div>
-                ) : (
-                    /* FORM STATE */
-                    <motion.div
-                     key="form"
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     exit={{ opacity: 0, filter: "blur(10px)" }}
-                     transition={{ duration: 0.5 }}
-                     className="p-6 sm:p-12 h-full flex flex-col"
-                    >
-                      <h3 className="text-xl sm:text-2xl font-light tracking-wide mb-8 sm:mb-10 text-white">
-                        Project Inquiry
-                      </h3>
 
-                      <form onSubmit={handleSubmit} className="space-y-8 sm:space-y-10 flex-grow">
-                        
-                        {/* Name Input */}
-                        <div className="relative group">
-                          <input 
-                            required
-                            type="text" 
-                            name="name"
-                            value={formState.name}
-                            onChange={(e) => setFormState({...formState, name: e.target.value})}
-                            placeholder=" "
-                            className={`block py-4 px-0 w-full text-base sm:text-lg text-white bg-transparent border-0 border-b appearance-none focus:outline-none focus:ring-0 transition-colors duration-300 ${isFocused === 'name' ? 'border-yellow-600' : 'border-neutral-700'}`}
-                            onFocus={() => handleFocus('name')}
-                            onBlur={handleBlur}
-                          />
-                          <label className={`absolute text-sm duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 ${isFocused === 'name' || formState.name ? 'text-yellow-600' : 'text-neutral-500'}`}>
-                            Your Name *
-                          </label>
-                        </div>
+  const toggleSound = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
 
-                        {/* Email Input */}
-                        <div className="relative group">
-                          <input 
-                            required
-                            type="email" 
-                            name="email"
-                            value={formState.email}
-                            onChange={(e) => setFormState({...formState, email: e.target.value})}
-                            placeholder=" "
-                            className={`block py-4 px-0 w-full text-base sm:text-lg text-white bg-transparent border-0 border-b appearance-none focus:outline-none focus:ring-0 transition-colors duration-300 ${isFocused === 'email' ? 'border-yellow-600' : 'border-neutral-700'}`}
-                            onFocus={() => handleFocus('email')}
-                            onBlur={handleBlur}
-                          />
-                          <label className={`absolute text-sm duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 ${isFocused === 'email' || formState.email ? 'text-yellow-600' : 'text-neutral-500'}`}>
-                            Email Address *
-                          </label>
-                        </div>
+  return (
+    <section 
+      id="section-5"
+      ref={sectionRef}
+      className="relative w-full overflow-hidden bg-black flex items-center justify-center aspect-video sm:aspect-auto sm:h-auto md:h-screen"
+    >
+      
+      {/* ---------------------------------------------------------------------------
+          LOADER OVERLAY
+          --------------------------------------------------------------------------- */}
+      <div 
+        className={`
+          absolute inset-0 z-50 flex flex-col items-center justify-center bg-black
+          transition-opacity duration-1000 ease-out
+          ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        `}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <Clapperboard className="w-8 h-8 text-neutral-600 animate-pulse" />
+          <div className="h-[1px] w-32 bg-neutral-800">
+            <div 
+              className="h-full bg-white transition-all duration-200"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-[10px] font-mono tracking-widest text-neutral-500">
+            INITIALIZING SCENE {progress}%
+          </span>
+        </div>
+      </div>
 
-                        {/* Project Type Grid */}
-                        <div className="space-y-4">
-                          <span className="text-xs uppercase tracking-widest text-neutral-500">Interest</span>
-                          <div className="flex flex-wrap gap-2 sm:gap-3">
-                            {projectTypes.map((type) => (
-                              <button
-                                type="button"
-                                key={type}
-                                onClick={() => setFormState({ ...formState, type: type })}
-                                className={`px-3 py-2 sm:px-4 sm:py-2 text-[10px] sm:text-xs uppercase tracking-wider border transition-all duration-300 ${
-                                  formState.type === type 
-                                  ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.1)]' 
-                                  : 'bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600'
-                                }`}
-                              >
-                                {type}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+      {/* ---------------------------------------------------------------------------
+          VIDEO LAYER
+          --------------------------------------------------------------------------- */}
+      <div className="absolute inset-0 z-0">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover transform-gpu"
+          loop
+          playsInline
+          preload="auto"
+          onCanPlayThrough={handleVideoLoad}
+        >
+          <source src="/videos/herofour.mp4" type="video/mp4" />
+        </video>
+        {/* Darker cinematic overlay for text contrast */}
+        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+      </div>
 
-                        {/* Message Input */}
-                        <div className="relative group pt-4">
-                          <textarea 
-                            name="message"
-                            rows={3}
-                            value={formState.message}
-                            onChange={(e) => setFormState({...formState, message: e.target.value})}
-                            placeholder=" "
-                            className={`block py-4 px-0 w-full text-base sm:text-lg text-white bg-transparent border-0 border-b appearance-none focus:outline-none focus:ring-0 transition-colors duration-300 resize-none ${isFocused === 'message' ? 'border-yellow-600' : 'border-neutral-700'}`}
-                            onFocus={() => handleFocus('message')}
-                            onBlur={handleBlur}
-                          />
-                          <label className={`absolute text-sm duration-300 transform -translate-y-6 scale-75 top-7 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 ${isFocused === 'message' || formState.message ? 'text-yellow-600' : 'text-neutral-500'}`}>
-                            Tell me about your project
-                          </label>
-                        </div>
+      {/* ---------------------------------------------------------------------------
+          DIRECTOR'S INTRO OVERLAY (Timing Modified)
+          --------------------------------------------------------------------------- */}
+      <div 
+        className={`
+          absolute inset-0 z-30 flex flex-col items-center justify-center text-center pointer-events-none
+          transition-all duration-[1000ms] ease-out
+          ${showIntro && !isLoading ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-110 blur-xl'}
+        `}
+      >
+        <div className="space-y-6">
+          {/* Animated "Directed By" */}
+          <p className="text-xs md:text-sm font-bold tracking-[0.6em] text-yellow-500 uppercase animate-fade-in-slow">
+            A Film Directed By
+          </p>
+          
+          {/* Massive Name */}
+          <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white tracking-tighter uppercase drop-shadow-2xl animate-scale-slow">
+            PUNEET SHUKLA
+          </h1>
 
-                        {/* Animated Submit Button */}
-                        <button 
-                          disabled={status === 'loading'}
-                          type="submit"
-                          className="group relative w-full flex items-center justify-center gap-4 py-4 sm:py-5 bg-neutral-800 text-white uppercase tracking-[0.2em] text-xs sm:text-sm font-bold overflow-hidden transition-all duration-500 hover:bg-neutral-700 disabled:opacity-70 disabled:cursor-not-allowed mt-auto"
-                        >
-                           <AnimatePresence mode="wait">
-                              {status === 'loading' ? (
-                                 <motion.div
-                                   key="loader"
-                                   initial={{ opacity: 0, y: 10 }}
-                                   animate={{ opacity: 1, y: 0 }}
-                                   exit={{ opacity: 0, y: -10 }}
-                                   className="flex items-center gap-2"
-                                 >
-                                   <Loader2 className="w-4 h-4 animate-spin" />
-                                   <span>Processing</span>
-                                 </motion.div>
-                              ) : (
-                                 <motion.div
-                                   key="idle"
-                                   initial={{ opacity: 0, y: 10 }}
-                                   animate={{ opacity: 1, y: 0 }}
-                                   exit={{ opacity: 0, y: -10 }}
-                                   className="flex items-center gap-3 z-10"
-                                 >
-                                   <span>Send Message</span> <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                 </motion.div>
-                              )}
-                           </AnimatePresence>
-                           
-                           {/* Hover Effect Background */}
-                           {status !== 'loading' && (
-                              <div className="absolute inset-0 bg-white mix-blend-difference transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out z-0 pointer-events-none" />
-                           )}
-                        </button>
+          <div className="flex items-center justify-center gap-3 animate-fade-in-slow delay-500">
+            <div className="h-[1px] w-12 bg-white/50" />
+            <Award className="w-5 h-5 text-neutral-300" />
+            <div className="h-[1px] w-12 bg-white/50" />
+          </div>
+        </div>
+      </div>
 
-                      </form>
-                    </motion.div>
-                )}
-             </AnimatePresence>
-          </motion.div>
-        </div>
-        
-      </div>
+      {/* ---------------------------------------------------------------------------
+          ALWAYS VISIBLE CONTROLS
+          --------------------------------------------------------------------------- */}
+      {!isLoading && (
+        <>
+        {/* LEFT: Captured On Card */}
+        <div className="absolute bottom-12 left-8 z-40 animate-fade-in hidden md:block">
+            <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-5 py-3 rounded-sm border border-white/10 hover:bg-black/60 transition-colors">
+                <div className="text-left">
+                    <div className="text-[10px] text-neutral-400 uppercase tracking-widest mb-1">
+                        Captured On
+                    </div>
+                    <div className="text-sm font-bold text-white tracking-wider">
+                        SONY ALPHA
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      {/* ---------------- FOOTER BAR ---------------- */}
-      <div className="w-full border-t border-neutral-900 mt-16 sm:mt-24 pt-8">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-neutral-600 uppercase tracking-widest text-center md:text-left">
-           <span>&copy; 2024 Puneet Shukla Films. All Rights Reserved.</span>
-           <div className="flex gap-8">
-             <span className="cursor-pointer hover:text-white transition-colors">Privacy Policy</span>
-             <span className="cursor-pointer hover:text-white transition-colors">Terms of Use</span>
-           </div>
-        </div>
-      </div>
 
-    </section>
-  );
+          {/* RIGHT: Sound Controls */}
+          <div className="absolute bottom-12 right-8 z-40 flex items-center gap-4 animate-fade-in">
+            <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-bold tracking-widest text-white uppercase">Sound Experience</p>
+                <p className="text-[10px] text-neutral-400 font-mono">DOLBY DIGITAL 5.1</p>
+            </div>
+            <button 
+                onClick={toggleSound}
+                className="p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+            >
+                {isMuted ? (
+                <VolumeX className="w-5 h-5 text-white/70 group-hover:text-white" />
+                ) : (
+                <Volume2 className="w-5 h-5 text-white group-hover:text-yellow-400" />
+                )}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ---------------------------------------------------------------------------
+          CSS ANIMATIONS
+          --------------------------------------------------------------------------- */}
+      <style jsx global>{`
+        @keyframes fade-in-slow {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scale-slow {
+          0% { transform: scale(0.9); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-fade-in-slow {
+          animation: fade-in-slow 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .animate-scale-slow {
+          animation: scale-slow 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .animate-fade-in {
+          animation: fade-in-slow 1s ease-out forwards;
+        }
+      `}</style>
+    </section>
+  );
 };
 
 export default Section5;
