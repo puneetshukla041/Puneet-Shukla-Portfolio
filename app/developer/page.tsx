@@ -1,14 +1,17 @@
-"use client";
+import React from 'react';
+import Header from '@/components/Header';
+import Section1 from '@/components/developer/section1';
 
-import Header from "@/components/Header";
 
-const BlackPage = () => {
+const Page = () => {
   return (
-    <>
+    <main className="relative">
       <Header />
-      <div style={{ background: "#000", position: "absolute", inset: 0 }} />
-    </>
+ 
+        <Section1 />
+   
+    </main>
   );
 };
 
-export default BlackPage;
+export default Page;
