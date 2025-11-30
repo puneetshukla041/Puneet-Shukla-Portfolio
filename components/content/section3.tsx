@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Volume2, VolumeX, Clapperboard, Award } from 'lucide-react';
 
-// Renamed the component to Section3
 const Section3 = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -164,10 +163,15 @@ const Section3 = () => {
 
       {/* ---------------------------------------------------------------------------
           VIDEO LAYER
+          The key classes for 16:9 on mobile (full screen with cropping) are:
+          1. Parent div: absolute inset-0 z-0
+          2. Video tag: w-full h-full object-cover
+          These ensure the video fills the screen while maintaining its ratio.
           --------------------------------------------------------------------------- */}
       <div className="absolute inset-0 z-0">
         <video
           ref={videoRef}
+          // The object-cover class ensures the video always fills the container while maintaining its 16:9 aspect ratio, cropping the top/bottom as necessary on tall screens.
           className="w-full h-full object-cover transform-gpu"
           loop
           playsInline
