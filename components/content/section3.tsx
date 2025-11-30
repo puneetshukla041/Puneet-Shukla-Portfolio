@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-// Removed unused imports 'Play' and 'Camera'
 import { Volume2, VolumeX, Clapperboard, Award } from 'lucide-react';
 
-const Section4 = () => {
+// Renamed the component to Section3
+const Section3 = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showIntro, setShowIntro] = useState(false);
   const [isMuted, setIsMuted] = useState(false); // State tracks that we WANT sound on
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -51,7 +51,7 @@ const Section4 = () => {
 
   const handleVideoLoad = () => {
     if (videoRef.current) {
-        videoRef.current.defaultMuted = false; // Important: Tell browser we intend to have sound
+      videoRef.current.defaultMuted = false;
     }
     setProgress(100);
     setTimeout(() => {
@@ -60,69 +60,67 @@ const Section4 = () => {
   };
 
   // ---------------------------------------------------------------------------
-  // 3. AGGRESSIVE SOUND-ON PLAYBACK LOGIC (Wrapped in useCallback)
+  // 3. AGGRESSIVE SOUND-ON PLAYBACK LOGIC
   // ---------------------------------------------------------------------------
   const attemptPlay = useCallback(async () => {
     if (videoRef.current) {
       try {
         // FORCE sound settings every time we try to play
         videoRef.current.volume = 1.0;
-        videoRef.current.muted = false; 
-        
+        videoRef.current.muted = false;
+
         await videoRef.current.play();
         setIsMuted(false); // Success: Sound is ON
-      } catch { // 🚀 FIX: Removed the unused error variable in the catch block (requires ES2019+)
+      } catch { // Removed the unused error variable
         console.log("Browser blocked unmuted autoplay. Falling back to muted.");
         // Fallback: Mute and play so the video doesn't freeze
         if (videoRef.current) {
-            videoRef.current.muted = true;
-            await videoRef.current.play();
-            setIsMuted(true); 
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+          setIsMuted(true);
         }
       }
     }
-  }, []); // Dependencies are empty since it only uses videoRef.current (which is stable) and setState dispatchers (which are stable)
+  }, []);
 
   const pauseVideo = useCallback(() => {
     if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current.pause();
+      videoRef.current.pause();
     }
-  }, []); // Dependencies are empty since it only uses videoRef.current (which is stable)
+  }, []);
 
   // ---------------------------------------------------------------------------
   // 4. INTERSECTION OBSERVER (Scroll Detection)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (isLoading) return; 
+    if (isLoading) return;
 
-    // Copy ref value to a constant variable inside the effect body
     const currentSectionRef = sectionRef.current;
 
     const observer = new IntersectionObserver(
         (entries) => {
-            const entry = entries[0];
-            if (entry.isIntersecting) {
-                // User sees the section -> FORCE PLAY WITH SOUND
-                attemptPlay();
-            } else {
-                // User scrolled away -> PAUSE
-                pauseVideo();
-            }
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            // User sees the section -> FORCE PLAY WITH SOUND
+            attemptPlay();
+          } else {
+            // User scrolled away -> PAUSE
+            pauseVideo();
+          }
         },
-        { threshold: 0.5 } 
+        { threshold: 0.5 }
     );
 
     if (currentSectionRef) {
-        observer.observe(currentSectionRef);
+      observer.observe(currentSectionRef);
     }
 
     return () => {
-        // Use the local variable in the cleanup function
-        if (currentSectionRef) {
-            observer.unobserve(currentSectionRef);
-        }
+      if (currentSectionRef) {
+        observer.unobserve(currentSectionRef);
+      }
     };
-  }, [isLoading, attemptPlay, pauseVideo]); 
+  }, [isLoading, attemptPlay, pauseVideo]);
 
 
   const toggleSound = () => {
@@ -133,16 +131,17 @@ const Section4 = () => {
   };
 
   return (
-    <section 
-        id="section-3" // Assuming this is where it needs to be for navigation
-        ref={sectionRef}
-        className="relative w-full h-screen bg-black overflow-hidden flex items-center justify-center"
+    <section
+      // Updated id to 'section-3'
+      id="section-3"
+      ref={sectionRef}
+      className="relative w-full h-screen bg-black overflow-hidden flex items-center justify-center"
     >
-      
+
       {/* ---------------------------------------------------------------------------
           LOADER OVERLAY
           --------------------------------------------------------------------------- */}
-      <div 
+      <div
         className={`
           absolute inset-0 z-50 flex flex-col items-center justify-center bg-black
           transition-opacity duration-1000 ease-out
@@ -152,7 +151,7 @@ const Section4 = () => {
         <div className="flex flex-col items-center gap-4">
           <Clapperboard className="w-8 h-8 text-neutral-600 animate-pulse" />
           <div className="h-[1px] w-32 bg-neutral-800">
-            <div 
+            <div
               className="h-full bg-white transition-all duration-200"
               style={{ width: `${progress}%` }}
             />
@@ -175,17 +174,16 @@ const Section4 = () => {
           preload="auto"
           onCanPlayThrough={handleVideoLoad}
         >
-          {/* NOTE: Changed source back to heroone.mp4 based on previous context/assumption */}
-          <source src="/videos/heroone.mp4" type="video/mp4" /> 
+          <source src="/videos/heroone.mp4" type="video/mp4" />
         </video>
         {/* Darker cinematic overlay for text contrast */}
         <div className="absolute inset-0 bg-black/20 pointer-events-none" />
       </div>
 
       {/* ---------------------------------------------------------------------------
-          DIRECTOR'S INTRO OVERLAY (Timing Modified)
+          DIRECTOR'S INTRO OVERLAY
           --------------------------------------------------------------------------- */}
-      <div 
+      <div
         className={`
           absolute inset-0 z-30 flex flex-col items-center justify-center text-center pointer-events-none
           transition-all duration-[1000ms] ease-out
@@ -197,7 +195,7 @@ const Section4 = () => {
           <p className="text-xs md:text-sm font-bold tracking-[0.6em] text-yellow-500 uppercase animate-fade-in-slow">
             A Film Directed By
           </p>
-          
+
           {/* Massive Name */}
           <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white tracking-tighter uppercase drop-shadow-2xl animate-scale-slow">
             PUNEET SHUKLA
@@ -216,36 +214,36 @@ const Section4 = () => {
           --------------------------------------------------------------------------- */}
       {!isLoading && (
         <>
-{/* LEFT: Captured On Card */}
-<div className="absolute bottom-12 left-8 z-40 animate-fade-in hidden md:block">
-    <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-5 py-3 rounded-sm border border-white/10 hover:bg-black/60 transition-colors">
-        <div className="text-left">
-            <div className="text-[10px] text-neutral-400 uppercase tracking-widest mb-1">
-                Captured On
+          {/* LEFT: Captured On Card */}
+          <div className="absolute bottom-12 left-8 z-40 animate-fade-in hidden md:block">
+            <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-5 py-3 rounded-sm border border-white/10 hover:bg-black/60 transition-colors">
+              <div className="text-left">
+                <div className="text-[10px] text-neutral-400 uppercase tracking-widest mb-1">
+                  Captured On
+                </div>
+                <div className="text-sm font-bold text-white tracking-wider">
+                  SONY ALPHA X DJI
+                </div>
+              </div>
             </div>
-            <div className="text-sm font-bold text-white tracking-wider">
-                SONY ALPHA X DJI
-            </div>
-        </div>
-    </div>
-</div>
+          </div>
 
           {/* RIGHT: Sound Controls */}
           <div className="absolute bottom-12 right-8 z-40 flex items-center gap-4 animate-fade-in">
-          <div className="text-right hidden sm:block">
+            <div className="text-right hidden sm:block">
               <p className="text-[10px] font-bold tracking-widest text-white uppercase">Sound Experience</p>
               <p className="text-[10px] text-neutral-400 font-mono">DOLBY DIGITAL 5.1</p>
-          </div>
-          <button 
+            </div>
+            <button
               onClick={toggleSound}
               className="p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-          >
+            >
               {isMuted ? (
-              <VolumeX className="w-5 h-5 text-white/70 group-hover:text-white" />
+                <VolumeX className="w-5 h-5 text-white/70 group-hover:text-white" />
               ) : (
-              <Volume2 className="w-5 h-5 text-white group-hover:text-yellow-400" />
+                <Volume2 className="w-5 h-5 text-white group-hover:text-yellow-400" />
               )}
-          </button>
+            </button>
           </div>
         </>
       )}
@@ -253,7 +251,7 @@ const Section4 = () => {
       {/* ---------------------------------------------------------------------------
           CSS ANIMATIONS
           --------------------------------------------------------------------------- */}
-      <style jsx global>{`
+      <style>{`
         @keyframes fade-in-slow {
           0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
@@ -276,4 +274,4 @@ const Section4 = () => {
   );
 };
 
-export default Section4;
+export default Section3;
