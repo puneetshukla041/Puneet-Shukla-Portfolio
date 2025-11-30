@@ -1,12 +1,29 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import Image from 'next/image';
-import { Calendar, MapPin, Building2, GraduationCap, Briefcase, ChevronRight } from 'lucide-react';
+import { MapPin, Building2, GraduationCap, Briefcase } from 'lucide-react';
+
+// Define Interface for Timeline Data
+interface TimelineData {
+  id: string;
+  category: string;
+  role: string;
+  company: string;
+  period: string;
+  duration?: string;
+  location: string;
+  logo: string;
+  description: string;
+  points: string[];
+  tech: string[];
+  color: string;
+  current?: boolean;
+}
 
 // --- Unified Data (Chronological Order: Education First -> Current Job Last) ---
-const timelineData = [
+const timelineData: TimelineData[] = [
   {
     id: 'education',
     category: 'Education',
@@ -139,7 +156,7 @@ const Section2 = () => {
   );
 };
 
-const TimelineItem = ({ data, index }: { data: any, index: number }) => {
+const TimelineItem = ({ data, index }: { data: TimelineData, index: number }) => {
   const isEducation = data.category === 'Education';
 
   return (
