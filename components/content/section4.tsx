@@ -227,7 +227,7 @@ const Section4 = () => {
           <div className="flex flex-col items-center md:items-start gap-3 opacity-0 animate-cinematic-fade" style={{ animationDelay: '0.2s' }}>
              <div className="flex items-center gap-2 text-orange-600/70">
                 <MapPin className="w-3 h-3" />
-                <span className="text-[9px] font-mono tracking-[0.3em] uppercase">Ghazipur, Delhi</span>
+                <span className="text-[9px] font-mono tracking-[0.3em] uppercase">Dwarka, Delhi</span>
              </div>
              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[0.9]">
                Delhi Streets<br/>
