@@ -35,6 +35,9 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
   const [isSwitching, setIsSwitching] = useState(false);
+  
+  // Visibility State: Defaults to hidden on developer page, visible otherwise
+  const [isVisible, setIsVisible] = useState(() => !isDeveloperMode);
 
   // Toggle Logic with Animation Delay
   const handleToggle = () => {
@@ -92,14 +95,32 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
-  // Sticky Header Effect
+  // Scroll Handler for Sticky & Visibility
   useEffect(() => {
     const handleScroll = () => {
-      setSticky(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      
+      // 1. Sticky Header Logic
+      setSticky(currentScrollY > 20);
+
+      // 2. Developer Page Visibility Logic
+      if (isDeveloperMode) {
+        // Hide header if we are in the top half of the first screen (Hero Section)
+        // Show header once we scroll past that point
+        const threshold = window.innerHeight / 2;
+        setIsVisible(currentScrollY > threshold);
+      } else {
+        // Always show header on Content pages
+        setIsVisible(true);
+      }
     };
+
+    // Run immediately to set initial state correctly
+    handleScroll();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isDeveloperMode]);
 
   // Menu Data
   const developerMenuItems: MenuItem[] = [
@@ -137,8 +158,9 @@ const Header = () => {
       {/* --- DESKTOP HEADER --- */}
       <motion.header
         initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`hidden md:block fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ease-in-out border-b ${
+        animate={{ y: isVisible ? 0 : -100 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className={`hidden md:block fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-500 ease-in-out border-b ${
           sticky 
             ? 'bg-black/60 backdrop-blur-xl border-white/10 shadow-lg shadow-black/20' 
             : 'bg-transparent border-transparent'
@@ -247,9 +269,11 @@ const Header = () => {
         <motion.header
           className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center transition-all duration-300"
           animate={{
+            y: isVisible ? 0 : -100,
             backgroundColor: (sticky || mobileMenuOpen) ? 'rgba(0,0,0,0.85)' : 'transparent',
             backdropFilter: (sticky || mobileMenuOpen) ? 'blur(20px)' : 'none',
           }}
+          transition={{ duration: 0.4 }}
         >
           <Link href="/" className="z-50 relative cursor-pointer">
              <Image 
