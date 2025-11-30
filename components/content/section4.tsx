@@ -1,6 +1,5 @@
 'use client';
 
-// 🚀 FIX 1: Import useCallback
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Volume2, VolumeX, Clapperboard, Award } from 'lucide-react';
 
@@ -62,7 +61,7 @@ const Section4 = () => {
   // ---------------------------------------------------------------------------
   // 3. AGGRESSIVE SOUND-ON PLAYBACK LOGIC (Wrapped in useCallback)
   // ---------------------------------------------------------------------------
-  const attemptPlay = useCallback(async () => { // 🚀 FIX 2: Wrapped in useCallback
+  const attemptPlay = useCallback(async () => {
     if (videoRef.current) {
       try {
         // FORCE sound settings every time we try to play
@@ -71,7 +70,7 @@ const Section4 = () => {
         
         await videoRef.current.play();
         setIsMuted(false); // Success: Sound is ON
-      } catch (_) { // 🚀 FIX 3: Changed 'e' to '_' to silence the unused variable warning
+      } catch { // Fixed: Empty catch block to ignore unused error variable
         console.log("Browser blocked unmuted autoplay. Falling back to muted.");
         // Fallback: Mute and play so the video doesn't freeze
         if (videoRef.current) {
@@ -81,13 +80,13 @@ const Section4 = () => {
         }
       }
     }
-  }, []); // Dependencies are empty -> function is stable
+  }, []);
 
-  const pauseVideo = useCallback(() => { // 🚀 FIX 4: Wrapped in useCallback
+  const pauseVideo = useCallback(() => {
     if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
     }
-  }, []); // Dependencies are empty -> function is stable
+  }, []);
 
   // ---------------------------------------------------------------------------
   // 4. INTERSECTION OBSERVER (Scroll Detection)
@@ -95,7 +94,7 @@ const Section4 = () => {
   useEffect(() => {
     if (isLoading) return; 
 
-    // Copy ref value to a constant variable inside the effect body (Fixes cleanup warning)
+    // Copy ref value to a constant variable inside the effect body (for cleanup safety)
     const currentSectionRef = sectionRef.current;
     
     const observer = new IntersectionObserver(
@@ -122,7 +121,7 @@ const Section4 = () => {
             observer.unobserve(currentSectionRef);
         }
     };
-    // 🚀 FIX 5: Dependencies are clean now.
+    // Dependencies are stable functions (useCallback) and state (isLoading)
   }, [isLoading, attemptPlay, pauseVideo]); 
 
 
