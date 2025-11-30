@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, VolumeX, Clapperboard, Award } from 'lucide-react';
+import { Volume2, VolumeX, Clapperboard, Award, Camera } from 'lucide-react';
 
 const Section4 = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showIntro, setShowIntro] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  
+   
   const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
   // ---------------------------------------------------------------------------
-  // 1. LOADING ALGORITHM
+  // 1. LOADING & SETUP
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const interval = setInterval(() => {
@@ -28,51 +28,30 @@ const Section4 = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // 2. INTRO SEQUENCE LOGIC
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!isLoading) {
-      const startTimer = setTimeout(() => {
-        setShowIntro(true);
-      }, 3000);
-
-      const endTimer = setTimeout(() => {
-        setShowIntro(false);
-      }, 6000);
-
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(endTimer);
-      };
+      const startTimer = setTimeout(() => setShowIntro(true), 500);
+      return () => clearTimeout(startTimer);
     }
   }, [isLoading]);
 
   const handleVideoLoad = () => {
-    if (videoRef.current) {
-        videoRef.current.defaultMuted = false;
-    }
+    if (videoRef.current) videoRef.current.defaultMuted = false;
     setProgress(100);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    setTimeout(() => setIsLoading(false), 500);
   };
 
   // ---------------------------------------------------------------------------
-  // 3. AGGRESSIVE SOUND-ON PLAYBACK LOGIC (Wrapped in useCallback)
+  // 2. PLAYBACK LOGIC
   // ---------------------------------------------------------------------------
   const attemptPlay = useCallback(async () => {
     if (videoRef.current) {
       try {
-        // FORCE sound settings every time we try to play
         videoRef.current.volume = 1.0;
         videoRef.current.muted = false; 
-        
         await videoRef.current.play();
-        setIsMuted(false); // Success: Sound is ON
-      } catch { // Fixed: Empty catch block to ignore unused error variable
-        console.log("Browser blocked unmuted autoplay. Falling back to muted.");
-        // Fallback: Mute and play so the video doesn't freeze
+        setIsMuted(false); 
+      } catch { 
         if (videoRef.current) {
             videoRef.current.muted = true;
             await videoRef.current.play();
@@ -83,47 +62,22 @@ const Section4 = () => {
   }, []);
 
   const pauseVideo = useCallback(() => {
-    if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current.pause();
-    }
+    if (videoRef.current && !videoRef.current.paused) videoRef.current.pause();
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // 4. INTERSECTION OBSERVER (Scroll Detection)
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (isLoading) return; 
-
-    // Copy ref value to a constant variable inside the effect body (for cleanup safety)
     const currentSectionRef = sectionRef.current;
-    
     const observer = new IntersectionObserver(
         (entries) => {
-            const entry = entries[0];
-            if (entry.isIntersecting) {
-                // User sees the section -> FORCE PLAY WITH SOUND
-                attemptPlay();
-            } else {
-                // User scrolled away -> PAUSE
-                pauseVideo();
-            }
+            if (entries[0].isIntersecting) attemptPlay();
+            else pauseVideo();
         },
         { threshold: 0.5 } 
     );
-
-    if (currentSectionRef) {
-        observer.observe(currentSectionRef);
-    }
-
-    return () => {
-        if (currentSectionRef) {
-            // Use the local variable in the cleanup function
-            observer.unobserve(currentSectionRef);
-        }
-    };
-    // Dependencies are stable functions (useCallback) and state (isLoading)
+    if (currentSectionRef) observer.observe(currentSectionRef);
+    return () => { if (currentSectionRef) observer.unobserve(currentSectionRef); };
   }, [isLoading, attemptPlay, pauseVideo]); 
-
 
   const toggleSound = () => {
     if (videoRef.current) {
@@ -133,43 +87,34 @@ const Section4 = () => {
   };
 
   return (
-    // FIX: Removed the line break inside the className string literal to prevent "Unterminated string constant" error.
     <section 
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-black flex items-center justify-center aspect-video sm:aspect-auto sm:h-auto md:h-screen"
+      className="relative w-full h-[100dvh] md:h-screen bg-black flex flex-col md:block overflow-hidden"
     >
       
       {/* ---------------------------------------------------------------------------
-          LOADER OVERLAY
+          VIDEO LAYER (Top 60% Mobile / Full Screen Desktop)
           --------------------------------------------------------------------------- */}
-      <div 
-        className={`
-          absolute inset-0 z-50 flex flex-col items-center justify-center bg-black
-          transition-opacity duration-1000 ease-out
-          ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-        `}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <Clapperboard className="w-8 h-8 text-neutral-600 animate-pulse" />
-          <div className="h-[1px] w-32 bg-neutral-800">
-            <div 
-              className="h-full bg-white transition-all duration-200"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="text-[10px] font-mono tracking-widest text-neutral-500">
-            INITIALIZING SCENE {progress}%
-          </span>
+      <div className="relative w-full h-[60%] md:h-full md:absolute md:inset-0 md:z-0 bg-neutral-900 border-b md:border-none border-white/10">
+          
+         {/* LOADER */}
+         <div 
+            className={`
+                absolute inset-0 z-50 flex flex-col items-center justify-center bg-black
+                transition-opacity duration-1000 ease-out
+                ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+            `}
+        >
+            <Clapperboard className="w-8 h-8 text-neutral-600 animate-pulse mb-4" />
+            <div className="h-[1px] w-24 bg-neutral-800">
+                <div className="h-full bg-white transition-all duration-200" style={{ width: `${progress}%` }} />
+            </div>
         </div>
-      </div>
 
-      {/* ---------------------------------------------------------------------------
-          VIDEO LAYER
-          --------------------------------------------------------------------------- */}
-      <div className="absolute inset-0 z-0">
+        {/* VIDEO */}
         <video
           ref={videoRef}
-          className="w-full h-full object-cover transform-gpu"
+          className="w-full h-full object-cover"
           loop
           playsInline
           preload="auto"
@@ -177,101 +122,84 @@ const Section4 = () => {
         >
           <source src="/videos/herotwo.mp4" type="video/mp4" />
         </video>
-        {/* Darker cinematic overlay for text contrast */}
-        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+        
+        {/* OVERLAYS */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none md:hidden" />
+        <div className="hidden md:block absolute inset-0 bg-black/30 pointer-events-none" />
+
+        {/* SOUND BUTTON */}
+        {!isLoading && (
+             <div className="absolute top-4 right-4 md:bottom-12 md:top-auto md:right-12 z-40">
+                <button 
+                    onClick={toggleSound}
+                    className="p-3 md:p-4 rounded-full bg-black/30 md:bg-white/10 backdrop-blur-md border border-white/10 md:border-white/20 text-white/80 md:text-white md:hover:bg-white/20 transition-all"
+                >
+                    {isMuted ? <VolumeX className="w-4 h-4 md:w-6 md:h-6" /> : <Volume2 className="w-4 h-4 md:w-6 md:h-6 text-yellow-500 md:text-yellow-400" />}
+                </button>
+            </div>
+        )}
       </div>
 
       {/* ---------------------------------------------------------------------------
-          DIRECTOR'S INTRO OVERLAY (Timing Modified)
+          CONTENT CARD (Bottom 40% Mobile / Full Overlay Desktop)
           --------------------------------------------------------------------------- */}
-      <div 
-        className={`
-          absolute inset-0 z-30 flex flex-col items-center justify-center text-center pointer-events-none
-          transition-all duration-[1000ms] ease-out
-          ${showIntro && !isLoading ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-110 blur-xl'}
-        `}
-      >
-        <div className="space-y-6">
-          {/* Animated "Directed By" */}
-          <p className="text-xs md:text-sm font-bold tracking-[0.6em] text-yellow-500 uppercase animate-fade-in-slow">
-            A Film Directed By
-          </p>
-          
-          {/* Massive Name */}
-          <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white tracking-tighter uppercase drop-shadow-2xl animate-scale-slow">
-            PUNEET SHUKLA
-          </h1>
+      <div className="relative w-full h-[40%] md:h-full md:absolute md:inset-0 md:pointer-events-none md:z-10 bg-black md:bg-transparent flex flex-col items-center justify-center px-6 text-center">
+            
+            {/* Texture (Mobile Only) */}
+            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none md:hidden" />
 
-          <div className="flex items-center justify-center gap-3 animate-fade-in-slow delay-500">
-            <div className="h-[1px] w-12 bg-white/50" />
-            <Award className="w-5 h-5 text-neutral-300" />
-            <div className="h-[1px] w-12 bg-white/50" />
-          </div>
-        </div>
-      </div>
+            {!isLoading && (
+                <div className={`flex flex-col items-center gap-4 md:gap-8 transition-all duration-1000 transform ${showIntro ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    
+                    {/* Header Line */}
+                    <div className="flex items-center gap-3 opacity-60">
+                         <div className="h-[1px] w-8 md:w-16 bg-yellow-600/50" />
+                         <span className="text-[10px] md:text-sm font-serif italic text-yellow-500 tracking-widest">
+                            Official Portfolio Selection
+                         </span>
+                         <div className="h-[1px] w-8 md:w-16 bg-yellow-600/50" />
+                    </div>
 
-      {/* ---------------------------------------------------------------------------
-          ALWAYS VISIBLE CONTROLS
-          --------------------------------------------------------------------------- */}
-      {!isLoading && (
-        <>
-        {/* LEFT: Captured On Card */}
-        <div className="absolute bottom-12 left-8 z-40 animate-fade-in hidden md:block">
-            <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-5 py-3 rounded-sm border border-white/10 hover:bg-black/60 transition-colors">
-                <div className="text-left">
-                    <div className="text-[10px] text-neutral-400 uppercase tracking-widest mb-1">
-                        Captured On
+                    {/* Title */}
+                    <div className="space-y-1 md:space-y-4">
+                        <p className="text-[9px] md:text-xs uppercase tracking-[0.4em] text-neutral-500 md:text-neutral-300 font-sans">
+                            Directed & Edited By
+                        </p>
+                        <h1 className="text-4xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter uppercase leading-[0.9] md:drop-shadow-2xl">
+                            PUNEET<br className="md:hidden"/> <span className="hidden md:inline"> </span>SHUKLA
+                        </h1>
                     </div>
-                    <div className="text-sm font-bold text-white tracking-wider">
-                        SONY ALPHA
+
+                    {/* -----------------------------------------------------------
+                      THE PARAGRAPH SECTION (UPDATED)
+                      ----------------------------------------------------------- 
+                    */}
+                    <p className="text-xs md:text-lg text-neutral-400 md:text-neutral-200 font-serif italic leading-relaxed max-w-[85%] md:max-w-2xl mx-auto opacity-80 md:opacity-90">
+                        {/* Mobile Text (Delhi) */}
+                        <span className="md:hidden">
+                            "Echoes of the capital. A raw, unscripted narrative captured in the veins of Delhi."
+                        </span>
+                        {/* Desktop Text (Original) */}
+                        <span className="hidden md:block">
+                            "Visualizing the unseen. A showcase of motion, emotion, and technical precision."
+                        </span>
+                    </p>
+
+                    {/* Footer Icons */}
+                    <div className="mt-2 md:mt-8 pt-4 md:pt-0 border-t md:border-none border-white/10 w-full flex justify-center gap-6 md:gap-12">
+                        <div className="flex flex-col items-center gap-1">
+                            <Camera className="w-3 h-3 md:w-5 md:h-5 text-neutral-500 md:text-neutral-300" />
+                            <span className="text-[8px] md:text-[10px] text-neutral-600 md:text-neutral-400 uppercase tracking-wider">Sony Alpha</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                            <Award className="w-3 h-3 md:w-5 md:h-5 text-neutral-500 md:text-neutral-300" />
+                            <span className="text-[8px] md:text-[10px] text-neutral-600 md:text-neutral-400 uppercase tracking-wider">Dolby 5.1</span>
+                        </div>
                     </div>
+
                 </div>
-            </div>
-        </div>
-
-
-          {/* RIGHT: Sound Controls */}
-          <div className="absolute bottom-12 right-8 z-40 flex items-center gap-4 animate-fade-in">
-            <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold tracking-widest text-white uppercase">Sound Experience</p>
-                <p className="text-[10px] text-neutral-400 font-mono">DOLBY DIGITAL 5.1</p>
-            </div>
-            <button 
-                onClick={toggleSound}
-                className="p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-            >
-                {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white/70 group-hover:text-white" />
-                ) : (
-                <Volume2 className="w-5 h-5 text-white group-hover:text-yellow-400" />
-                )}
-            </button>
-          </div>
-        </>
-      )}
-
-      {/* ---------------------------------------------------------------------------
-          CSS ANIMATIONS
-          --------------------------------------------------------------------------- */}
-      <style jsx global>{`
-        @keyframes fade-in-slow {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scale-slow {
-          0% { transform: scale(0.9); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-fade-in-slow {
-          animation: fade-in-slow 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        .animate-scale-slow {
-          animation: scale-slow 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        .animate-fade-in {
-          animation: fade-in-slow 1s ease-out forwards;
-        }
-      `}</style>
+            )}
+      </div>
     </section>
   );
 };
