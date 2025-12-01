@@ -7,6 +7,7 @@ import Section4 from '@/components/content/section4';
 import Section5 from '@/components/content/section5';
 import Section6 from '@/components/content/section6';
 import Section7 from '@/components/content/section7';
+import Section8 from '@/components/content/section8';
 
 const Page = () => {
   return (
@@ -29,15 +30,23 @@ const Page = () => {
         <Section3 />
       </section>
 
-      <section id="section-4">
+      <section id="section-3">
         <Section4 />
       </section>
       
 
-      <section id="section-5">
+      <section id="section-3">
         <Section5 />
       </section>
-      <Section6/>
+
+      <section id="section-3">
+        <Section6 />
+      </section>
+
+      <section id="section-3">
+        <Section8 />
+      </section>
+
       <Section7/>
 
     </main>
