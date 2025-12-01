@@ -146,7 +146,7 @@ const SectionBombay = () => {
             />
           </div>
           <span className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase">
-            Rendering Colors {progress}%
+            Igniting Vision {progress}%
           </span>
         </div>
       </div>
@@ -157,18 +157,23 @@ const SectionBombay = () => {
       <div className="w-full md:flex-1 bg-black flex items-center justify-center relative border-b md:border-b-0 md:border-l border-white/10">
         
         {/* THE 16:9 CONTAINER */}
+        {/* The aspect-video class ensures the 16:9 ratio for the container */}
         <div className="relative w-full aspect-video group bg-neutral-900 overflow-hidden shadow-2xl">
             
             <video
               ref={videoRef}
-              style={{ transform: 'rotate(-90deg)' }}
-              className="w-full h-full object-cover transform-gpu"
+              // UPDATE: To rotate a video and make it fill a 16:9 container correctly using object-cover,
+              // we use absolute centering along with the rotation transform.
+              style={{ transform: 'translate(-50%, -50%) rotate(-90deg)' }}
+              // UPDATE: We use min-w/h-full and center positioning to ensure the rotated video covers the container area.
+              className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto object-cover transform-gpu"
               loop
               playsInline
               preload="auto"
               onCanPlayThrough={handleVideoLoad}
             >
-              <source src="/videos/herofive.mp4" type="video/mp4" />
+              {/* Updated Path */}
+              <source src="/videos/herosix.mp4" type="video/mp4" />
             </video>
 
             {/* Cinematic Overlay (Cool Morning Blue) */}
@@ -220,23 +225,23 @@ const SectionBombay = () => {
       <div className="w-full md:w-[40%] lg:w-[35%] bg-black flex flex-col items-center justify-center p-8 md:p-12 z-20 relative overflow-hidden">
         
         {/* Background Atmosphere */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-600/10 blur-[90px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-600/10 blur-[90px] rounded-full pointer-events-none" />
         
         {/* Content */}
         <div className="relative max-w-sm text-center md:text-left space-y-8 md:space-y-12">
           
           {/* Tagline */}
           <div className="flex flex-col items-center md:items-start gap-3 opacity-0 animate-cinematic-fade" style={{ animationDelay: '0.2s' }}>
-             <div className="flex items-center gap-2 text-blue-400/80">
+              <div className="flex items-center gap-2 text-purple-400/80">
                 <Wind className="w-3 h-3" />
-                <span className="text-[9px] font-mono tracking-[0.3em] uppercase">Color Grading</span>
-             </div>
-             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[0.9]">
-               The Palette of <br/>
-               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-blue-100 to-amber-500">
-                 Sky & Nature
+                <span className="text-[9px] font-mono tracking-[0.3em] uppercase">The Uphill Battle</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[0.9]">
+               Dreams <br/>
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-500">
+                  Vs. Everyone
                </span>
-             </h2>
+              </h2>
           </div>
 
           {/* Divider */}
@@ -244,17 +249,17 @@ const SectionBombay = () => {
 
           {/* Body */}
           <p className="text-sm md:text-base font-light leading-relaxed text-neutral-400 opacity-0 animate-cinematic-up font-serif italic" style={{ animationDelay: '0.8s' }}>
-            &quot;Enhancing the natural world through the lens of color. From the azure depths of the morning sky to the lush textures of the earth, we sculpt light and hue to craft a visual experience that feels both grounded and ethereal.&quot;
+            &quot;They told him to be realistic. They told him to follow the path. But the vision was too clear to ignore. Standing alone against the tide, it&apos;s not just about proving them wrong—it&apos;s about proving yourself right.&quot;
           </p>
 
           {/* Tech Specs */}
           <div className="flex items-center justify-center md:justify-start gap-4 opacity-0 animate-cinematic-fade" style={{ animationDelay: '1.2s' }}>
             <div className="flex items-center gap-2 text-neutral-700">
                 <Sunrise className="w-3 h-3" />
-                <span className="text-[9px] tracking-widest uppercase font-bold">Natural Light</span>
+                <span className="text-[9px] tracking-widest uppercase font-bold">Inner Light</span>
             </div>
-             <div className="w-1 h-1 bg-neutral-800 rounded-full" />
-             <span className="text-[9px] text-neutral-700 tracking-widest uppercase font-bold">Rec.709</span>
+              <div className="w-1 h-1 bg-neutral-800 rounded-full" />
+              <span className="text-[9px] text-neutral-700 tracking-widest uppercase font-bold">Resilience</span>
           </div>
           
         </div>
