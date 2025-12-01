@@ -10,7 +10,7 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
-  ChevronDown // Added this import
+  ChevronDown
 } from 'lucide-react';
 
 // --- TYPESCRIPT INTERFACES ---
@@ -170,7 +170,7 @@ const goldenSeries: PortfolioItem[] = [
   },
 ];
 
-// --- COMPONENT: Static Grid Item (No Hover Effects) ---
+// --- COMPONENT: Static Grid Item (Fixed Visibility) ---
 interface GridItemProps {
   item: PortfolioItem;
   onClick: (item: PortfolioItem) => void;
@@ -184,18 +184,18 @@ const GridItem = ({ item, onClick, index }: GridItemProps) => {
       className="relative cursor-pointer overflow-hidden flex flex-col gap-2"
     >
       <div className="relative w-full overflow-hidden bg-neutral-900 aspect-video ring-1 ring-white/10 rounded-sm"> 
+        {/* Fallback background */}
         <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center text-neutral-700">
-           {/* Fallback icon if image doesn't load */}
            <span className="text-4xl opacity-20">{item.category[0]}</span>
         </div>
         
-        {/* Simple image, no hover scaling, no scroll animation */}
+        {/* ADDED 'relative z-10' to ensure image sits ON TOP of the fallback background */}
         <img
           src={item.src}
           alt={item.title}
           width={item.width}
           height={item.height}
-          className="w-full h-full object-cover opacity-100" 
+          className="relative z-10 w-full h-full object-cover opacity-100" 
           onError={(e) => {
              e.currentTarget.style.display = 'none';
           }}
