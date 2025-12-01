@@ -112,7 +112,7 @@ const SectionNature = () => {
     <section
       id="section-nature"
       ref={sectionRef}
-      // LAYOUT: Removed 'flex-row-reverse' to keep Video on LEFT, Text on RIGHT
+      // LAYOUT: Video Left, Text Right
       className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col md:flex-row"
     >
       {/* ---------------------------------------------------------------------------
@@ -225,7 +225,7 @@ const SectionNature = () => {
                 <span className="text-[9px] font-mono tracking-[0.3em] uppercase">Ethereal Canvas</span>
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[0.9]">
-               Nature's <br/>
+               Nature&apos;s <br/>
                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-200 via-white to-blue-400">
                   Palette
                </span>
@@ -237,7 +237,7 @@ const SectionNature = () => {
 
           {/* Body */}
           <p className="text-sm md:text-base font-light leading-relaxed text-neutral-400 opacity-0 animate-cinematic-up font-serif italic" style={{ animationDelay: '0.8s' }}>
-            &quot;The sky doesn't ask for attention, yet it commands it. In the gradient of the horizon, we find the colors of our own emotions—ever-changing, infinite, and beautifully untamed.&quot;
+            &quot;The sky doesn&apos;t ask for attention, yet it commands it. In the gradient of the horizon, we find the colors of our own emotions—ever-changing, infinite, and beautifully untamed.&quot;
           </p>
 
           {/* Tech Specs */}
