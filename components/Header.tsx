@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, SVGMotionProps, Variants } from 'framer-motion';
+import { motion, AnimatePresence, SVGMotionProps, Variants, Transition } from 'framer-motion';
 import { Instagram, Linkedin, Github, ChevronRight, Code2, Palette, ArrowRight } from 'lucide-react';
 
 interface MenuItem {
@@ -75,7 +75,7 @@ const Header = () => {
 
   // --- SCROLLSPY LOGIC ---
   useEffect(() => {
-    let sections = [];
+    let sections: { id: string; name: string }[] = [];
     if (isDeveloperMode) {
       sections = [
         { id: 'section-1', name: 'Home' },
@@ -158,7 +158,7 @@ const Header = () => {
   };
 
   // Reusable bouncing arrow animation
-  const bounceTransition = {
+  const bounceTransition: Transition = {
     x: {
       duration: 0.8,
       repeat: Infinity,
@@ -241,7 +241,7 @@ const Header = () => {
                     <span>{isDeveloperMode ? "Switch to Content" : "Switch to Dev"}</span>
                     <motion.span
                         animate={{ x: [0, 4, 0] }}
-                        transition={bounceTransition as any}
+                        transition={bounceTransition}
                     >
                          <ArrowRight size={12} className="text-blue-400" />
                     </motion.span>
@@ -265,9 +265,9 @@ const Header = () => {
                     transition={{ duration: 0.5 }}
                   >
                     {isSwitching ? (
-                       isDeveloperMode ? <Palette size={12} className="text-blue-600" /> : <Code2 size={12} className="text-blue-600" />
+                      isDeveloperMode ? <Palette size={12} className="text-blue-600" /> : <Code2 size={12} className="text-blue-600" />
                     ) : (
-                       isDeveloperMode ? <Palette size={12} className="text-gray-700" /> : <Code2 size={12} className="text-gray-700" />
+                      isDeveloperMode ? <Palette size={12} className="text-gray-700" /> : <Code2 size={12} className="text-gray-700" />
                     )}
                   </motion.div>
                 </motion.div>
@@ -399,7 +399,7 @@ const Header = () => {
                         {/* Mobile Arrow Animation (Side of Toggle) */}
                         <motion.div
                             animate={{ x: [0, 5, 0] }}
-                            transition={bounceTransition as any}
+                            transition={bounceTransition}
                             className="text-blue-400"
                         >
                             <ArrowRight size={16} />
