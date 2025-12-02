@@ -140,12 +140,13 @@ const rawTimelineData: TimelineData[] = [
 // --- ORDER CHANGE: Reverse array to show Education (Oldest) First ---
 const timelineData = [...rawTimelineData].reverse();
 
-// --- SCRAMBLE TEXT COMPONENT ---
+// --- SCRAMBLE TEXT COMPONENT (FIXED) ---
 const ScrambleText = ({ text, className, trigger }: { text: string, className?: string, trigger: boolean }) => {
   const [display, setDisplay] = useState(text);
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
 
   useEffect(() => {
+    // Only run the animation logic if triggered to avoid sync state update loops
     if (trigger) {
         let iterations = 0;
         const interval = setInterval(() => {
@@ -159,14 +160,14 @@ const ScrambleText = ({ text, className, trigger }: { text: string, className?: 
         iterations += 1 / 3;
         }, 30);
         return () => clearInterval(interval);
-    } else {
-        setDisplay(text);
     }
   }, [trigger, text]);
 
   return (
     <span className={`cursor-default ${className}`}>
-      {display}
+      {/* If triggered, show the scrambling 'display' state. 
+         If NOT triggered, just render the static 'text' prop directly. */}
+      {trigger ? display : text}
     </span>
   );
 };
@@ -223,8 +224,8 @@ const Section2 = () => {
              <div className="absolute inset-0 w-full h-full bg-neutral-800/30 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"></div>
              
              <motion.div 
-                style={{ height: useTransform(height, [0, 1], ["0%", "100%"]) }}
-                className="absolute top-0 left-0 w-full bg-gradient-to-b from-amber-500 via-rose-500 to-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_100%)]"
+               style={{ height: useTransform(height, [0, 1], ["0%", "100%"]) }}
+               className="absolute top-0 left-0 w-full bg-gradient-to-b from-amber-500 via-rose-500 to-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_100%)]"
              />
           </div>
 
