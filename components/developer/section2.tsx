@@ -189,78 +189,77 @@ const customStyles = `
 
 // --- Data (Updated with Humanized Problem vs Solution Format) ---
 const FEATURE_DATA: FeatureItem[] = [
-  {
-    title: "Certificate Generator",
-    points: [
-      "Problem: Manual design was painfully slow. → Solution: We generate them instantly using 4 smart templates.",
-      "Problem: Personal emails hit sending limits. → Solution: We use direct SMTP to bypass Gmail restrictions completely.",
-      "Problem: Records were scattered everywhere. → Solution: A central dashboard now organizes everything with Excel exports."
-    ],
-    icon: <FileText size={20} />
-  },
-  {
-    title: "Poster Editor",
-    points: [
-      "Problem: Aligning logos took too much time. → Solution: Auto-layout scales and positions every logo instantly.",
-      "Problem: Print quality was often poor. → Solution: Cloud rendering guarantees sharp, 300 DPI high-res files.",
-      "Problem: Files kept getting lost locally. → Solution: Every single design is automatically backed up to AWS S3."
-    ],
-    icon: <ImageIcon size={20} />
-  },
-  {
-    title: "Background Remover",
-    points: [
-      "Problem: Wasting hours in Photoshop. → Solution: AI now clears backgrounds in just milliseconds.",
-      "Problem: Inconsistent employee photos. → Solution: Automatically standardizes every headshot for a uniform look.",
-      "Result: Perfect, ready-to-use assets for ID cards with no manual editing."
-    ],
-    icon: <Zap size={20} />
-  },
-  {
-    title: "ID Card Maker",
-    points: [
-      "Problem: Manual typing caused data errors. → Solution: We fetch verified employee details directly from the database.",
-      "Problem: Tricky print formatting. → Solution: Photos are auto-centered and cards are generated print-ready.",
-      "Result: 100% accurate, standardized company ID cards every time."
-    ],
-    icon: <CreditCard size={20} />
-  },
-  {
-    title: "Visiting Card Manager",
-    points: [
-      "Problem: The brand look was fragmented. → Solution: We enforce strict Light and Dark themes for consistency.",
-      "Problem: Losing doctor contact info. → Solution: Secure cloud storage keeps all medical directory data safe.",
-      "Result: Professional, on-brand cards generated in seconds."
-    ],
-    icon: <Users size={20} />
-  },
-  {
-    title: "Report a Bug",
-    points: [
-      "Problem: Bugs were going unreported. → Solution: A direct feedback pipeline built right into the app.",
-      "Problem: Fixes took too long to ship. → Solution: Real-time alerts reach the developer team immediately.",
-      "Result: Faster iterations and a much more stable platform."
-    ],
-    icon: <Bug size={20} />
-  },
-  {
-    title: "Theme Manager",
-    points: [
-      "Problem: Long sessions caused eye strain. → Solution: One-click toggle between High Contrast modes.",
-      "Problem: Hard to read in different lights. → Solution: Optimized contrast ensures readability in any environment.",
-      "Result: An interface that is truly inclusive and accessible."
-    ],
-    icon: <Palette size={20} />
-  },
-  {
-    title: "User Profile",
-    points: [
-      "Problem: Access wasn't strictly controlled. → Solution: Role-Based Access Control (RBAC) locks sensitive areas.",
-      "Problem: Session security was a risk. → Solution: All sessions are fully encrypted and managed securely.",
-      "Result: Enterprise-grade security for your most important data."
-    ],
-    icon: <Lock size={20} />
-  }
+{
+  title: "Certificate Generator",
+  points: [
+    "Manual certificate design previously required hours of repetitive editing. Now, certificates are generated instantly using smart pre-built templates with zero design effort.",
+    "Typing names, certificate IDs, departments, and dates manually caused frequent spelling mistakes. Automated field mapping now ensures 100% accuracy across every certificate.",
+    "Sending certificates individually via personal email accounts led to daily sending-limit issues and delivery failures. Our SMTP engine delivers certificates in bulk without any Gmail restrictions.",
+    "Recipient data was previously scattered across multiple sheets and folders, causing confusion and duplication. The centralized dashboard now stores every detail securely in one place.",
+    "Tracking issued certificates used to be impossible without manual logs. Real-time analytics now show total certificates issued, top recipients, and daily activity trends for quick reporting.",
+    "Exporting certificates for offline records once required manual downloading one-by-one. Bulk PDF exports and Excel downloads now allow thousands of certificates to be managed in seconds."
+  ],
+  icon: <FileText size={20} />
+},
+{
+  title: "Smart Poster Maker",
+  points: [
+    "Designing posters from scratch used to consume hours. Now every poster begins with a polished, ready-to-use default corporate template.",
+    "Centering and resizing a single logo was always a struggle. The system now auto-centers, resizes, and applies a curved border instantly — no manual adjustments needed.",
+    "Balancing multiple co-branding logos required high-level design skills. Our dynamic alignment algorithm distributes logos evenly with equal spacing and uniform sizing in one click.",
+    "Print quality often dropped when exporting from traditional design tools. Cloud rendering now outputs crisp, 300-DPI print-ready posters every single time.",
+    "Poster files were frequently lost in local drives and WhatsApp groups. Every poster is now securely stored and version-controlled on AWS S3 for lifetime access.",
+    "Sharing final posters once meant exporting and sending to each member manually. One-click public download links now allow instant sharing across teams, clients, and social media."
+  ],
+  icon: <ImageIcon size={20} />
+},
+{
+  title: "Background Remover",
+  points: [
+    "Manual Photoshop editing was consuming hours — AI now removes backgrounds in milliseconds with pixel-level precision.",
+    "Employee photos were inconsistent in size and framing — the system automatically standardizes every headshot to a professional format.",
+    "Media assets were scattered across devices — processed images are now securely saved in a centralized Assets Library.",
+    "Teams had to re-upload the same photos for each task — assets are now instantly reusable across ID Card Maker, Poster Maker, and Certificate Generator.",
+    "Exported transparent PNGs previously lost quality — the rendering engine now preserves full-resolution, print-grade clarity.",
+    "Preparing 50+ clean photos required designer expertise — now any staff member can process bulk images in minutes through one-click automation."
+  ],
+  icon: <Zap size={20} />
+},
+{
+  title: "ID Card Maker",
+  points: [
+    "Employee details were manually typed into design files → now all fields are pulled automatically from a verified centralized directory to prevent data errors.",
+    "Photos required manual cropping and alignment → the system auto-centers, resizes, and fits headshots perfectly to the card layout.",
+    "Each reissue required rebuilding the design from scratch → any employee's ID can now be regenerated instantly from stored records.",
+    "Blood groups and job titles were often miss-typed → structured dropdowns and validation rules now enforce standardized data entry.",
+    "Long names used to break layout symmetry → smart typography dynamically adjusts font size and hierarchy for a clean, professional look every time.",
+    "Test prints were required to check formatting → live preview shows the exact final design in real time, eliminating trial-and-error before printing."
+  ],
+  icon: <CreditCard size={20} />
+},
+{
+  title: "Visiting Card Manager",
+  points: [
+    "Manual redesign was needed for every new card → now data is stored once and reused to generate cards instantly anytime.",
+    "Brand identity was inconsistent across departments → strict Light and Dark templates now enforce a uniform corporate look.",
+    "Doctor contact details kept getting lost across files and WhatsApp chats → a secure cloud database permanently stores every professional’s information.",
+    "Theme changes required rebuilding the layout from zero → users switch between Light and Dark themes in one click with no redesigning.",
+    "Printing and sharing required extra follow-up → email integration sends the digital card directly to the doctor immediately after generation.",
+    "Errors went unnoticed until after printing → live preview ensures every card is accurate before export or dispatch."
+  ],
+  icon: <Users size={20} />
+},
+{
+  title: "Report a Bug",
+  points: [
+    " now a direct, in-app feedback system captures all bug reports instantly.",
+   
+   
+    " users can attach images and logs directly with each report.",
+    " all reports are centralized in a secure, organized dashboard.",
+  ],
+  icon: <Bug size={20} />
+},
 ];
 
 const NATIVE_APPS = {
@@ -279,11 +278,11 @@ const TECH_STACK_CORE = [
 ];
 
 const TECH_STACK_INFRA = [
-  "AWS S3", "AWS SES", "Docker", "MongoDB", "Redis"
+  "AWS S3", "AWS SES", "MongoDB", "Redis"
 ];
 
 const TECH_STACK_OPS = [
-  "CI/CD", "Jest Testing", "Electron", "Git/GitHub"
+  "CI/CD",  "Electron", "Git/GitHub", "Capacitor"
 ];
 
 // --- Components ---
@@ -476,16 +475,17 @@ export default function Section2() {
                 Manual Work
               </h3>
               <p className="text-white/60 leading-loose text-base">
-                Designers were tired of manually editing hundreds of files. Data was scattered across Excel and Photoshop, causing mistakes, version conflicts, and very long delays in getting work done.
+                Previously, the workflow for creative and administrative tasks was manual, fragmented, and time-consuming. Designers and staff had to type names individually for certificates, ID cards, and visiting cards, manually remove backgrounds from images, align logos in posters, and manage multiple spreadsheets for client or employee data. Changes in one system, like updating a name or department, did not automatically reflect in designs, leading to errors and inconsistencies. Generating bulk documents required hours of repetitive work, while tracking production, monitoring performance, and distributing outputs were slow and inefficient. Overall, the old process caused high manual effort, human errors, scattered data, and delays in delivery.
               </p>
             </div>
             <div className="hud-card p-10 border-l-4 border-l-emerald-500/50">
               <h3 className="text-white font-bold text-2xl mb-6 tracking-wide flex items-center gap-3">
                 <span className="text-emerald-500 text-xs font-mono uppercase tracking-widest border border-emerald-500/30 px-2 py-1 bg-emerald-500/10">[THE SOLUTION]</span>
                 Automation
+             
               </h3>
               <p className="text-white/60 leading-loose text-base">
-                We built one central system. Now, data is safely stored in <span className="text-white">MongoDB</span> and images are created automatically using <span className="text-white">AWS</span>. Jobs that used to take days now take just a few seconds.
+                SSISTUDIOS is an all-in-one workflow automation platform designed to replace slow, repetitive manual processes with a fast, accurate, and centralized system. Instead of typing names for certificates, editing ID cards one by one, aligning logos in posters, or removing image backgrounds manually, the platform automates all of these tasks through dedicated modules such as the Certificate Generator, ID Card Maker, Visiting Card Maker, Smart Poster Editor, and Background Remover. All data-like employee/client details, images, and branding assets-is stored in one secure database, ensuring consistency across every design and eliminating the risk of human error. Outputs such as certificates, posters, and ID cards are generated instantly in high quality, with options for bulk export and direct email distribution. Real-time analytics and a secure feedback system further support smooth operations. By unifying data management, automation, and distribution into a single dashboard.
               </p>
             </div>
           </div>
