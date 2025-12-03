@@ -462,8 +462,8 @@ export default function Section2() {
                         <p className="text-[9px] uppercase text-white/40 mb-4 tracking-widest">Core Tech</p>
                         <div className="flex flex-wrap gap-2">
                           <span className="tech-pill px-4 py-1.5 text-[10px] text-white/90 border border-white/10 bg-white/5 uppercase tracking-wider">AWS Cloud</span>
-                          <span className="tech-pill px-4 py-1.5 text-[10px] text-white/90 border border-white/10 bg-white/5 uppercase tracking-wider">MERN Stack</span>
-                          <span className="tech-pill px-4 py-1.5 text-[10px] text-white/90 border border-white/10 bg-white/5 uppercase tracking-wider">Microservices</span>
+                          <span className="tech-pill px-4 py-1.5 text-[10px] text-white/90 border border-white/10 bg-white/5 uppercase tracking-wider">NEXT.JS</span>
+                          <span className="tech-pill px-4 py-1.5 text-[10px] text-white/90 border border-white/10 bg-white/5 uppercase tracking-wider">MongoDB</span>
                         </div>
                     </div>
                   </div>
