@@ -7,7 +7,7 @@ import {
   Search, GitGraph, Files, Settings, MoreHorizontal, 
   X, Minus, ChevronRight, ChevronDown, 
   Hash, LayoutTemplate, Bug, Menu, AlertCircle, 
-  ArrowRight
+  Bell, Split, MoreVertical, Terminal
 } from 'lucide-react';
 
 // --- Types & Constants ---
@@ -71,22 +71,9 @@ Location: Remote / Hybrid
 Run the build command to see the magic happen.`
 };
 
-const MOCK_COMMITS = [
-  { hash: '8f4d2a', msg: 'feat: add advanced typescript skills', time: '2 mins ago' },
-  { hash: '3a1b9c', msg: 'fix: optimize next.js rendering', time: '1 hour ago' },
-  { hash: '7e2f1d', msg: 'style: improve ui aesthetics', time: 'Yesterday' },
-  { hash: '9c8b4a', msg: 'init: start professional journey', time: '4 years ago' },
-];
-
-const EXTENSIONS = [
-  { name: 'Prettier', desc: 'Code formatter', install: true },
-  { name: 'ESLint', desc: 'JS Linter', install: true },
-  { name: 'Tailwind CSS', desc: 'IntelliSense', install: true },
-];
-
 // --- Sub-Components ---
 
-// 1. Tooltip
+// 1. Tooltip (VS Code Style)
 const Tooltip = ({ text, children }: { text: string, children: React.ReactNode }) => {
   const [show, setShow] = useState(false);
   return (
@@ -95,8 +82,8 @@ const Tooltip = ({ text, children }: { text: string, children: React.ReactNode }
       <AnimatePresence>
         {show && (
           <motion.div 
-            initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="absolute left-full ml-2 px-2 py-1 bg-[#252526] text-white text-[10px] border border-[#454545] rounded shadow-xl z-50 whitespace-nowrap"
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            className="hidden md:block absolute left-14 px-2 py-1 bg-[#252526] text-[#cccccc] text-[11px] border border-[#454545] shadow-xl z-50 whitespace-nowrap pointer-events-none"
           >
             {text}
           </motion.div>
@@ -106,32 +93,31 @@ const Tooltip = ({ text, children }: { text: string, children: React.ReactNode }
   );
 };
 
-// 2. Syntax Highlighter (Improved)
+// 2. Syntax Highlighter
 const CodeRenderer = ({ code, lang }: { code: string, lang: string }) => {
     const lines = code.split('\n');
     return (
-      <div className="font-mono text-[13px] md:text-[14px] leading-relaxed whitespace-pre font-medium">
+      <div className="font-mono text-[13px] md:text-[14px] leading-relaxed whitespace-pre font-medium min-w-max">
         {lines.map((line, i) => (
-          <div key={i} className="table-row">
-             <span className="table-cell text-right pr-4 text-[#858585] select-none w-8 text-[12px]">{i + 1}</span>
+          <div key={i} className="table-row group">
+             <span className="table-cell text-right pr-4 md:pr-6 text-[#6e7681] select-none w-8 md:w-10 text-[12px] md:text-[13px] group-hover:text-[#c6c6c6] transition-colors">{i + 1}</span>
              <span className="table-cell">
                {line.split(/(\s+|[{}()[\],:;'"=])/g).map((token, j) => {
-                 let color = "#d4d4d4"; // Default
+                 let color = "#d4d4d4";
                  if (lang === 'ts') {
-                   if (['import', 'from', 'const', 'export', 'default', 'return', 'true', 'false'].includes(token)) color = "#c586c0";
-                   else if (['Developer', 'String', 'Array'].includes(token)) color = "#4ec9b0";
+                   if (['import', 'from', 'const', 'export', 'default', 'return', 'true', 'false'].includes(token)) color = "#569cd6";
+                   else if (['Developer', 'String', 'Array', 'puneet'].includes(token)) color = "#4ec9b0";
                    else if (token.startsWith('"') || token.startsWith("'")) color = "#ce9178";
                    else if (!isNaN(Number(token))) color = "#b5cea8";
-                   else if (token.match(/^[A-Z]/)) color = "#4ec9b0"; // Types
+                   else if (token.match(/^[A-Z]/)) color = "#4ec9b0";
                    else if (line.includes(':') && !line.includes('import') && token !== ':' && token.trim() !== '') {
-                      // Simple heuristic for object keys
-                      const parts = line.split(':');
-                      if(parts[0].includes(token)) color = "#9cdcfe";
+                     const parts = line.split(':');
+                     if(parts[0].includes(token)) color = "#9cdcfe";
                    }
                  } else if (lang === 'css') {
                    if (token.startsWith('.')) color = "#d7ba7d";
                    else if (token.startsWith('#')) color = "#d7ba7d";
-                   else if (token.includes(':')) color = "#9cdcfe"; // Properties
+                   else if (token.includes(':')) color = "#9cdcfe"; 
                    else if (['flex', 'column', 'center', 'all'].includes(token)) color = "#ce9178"; 
                    else if (token.match(/[0-9]/)) color = "#b5cea8";
                  } else if (lang === 'md') {
@@ -152,14 +138,17 @@ const Section1 = () => {
   const [activeTab, setActiveTab] = useState<TabName>('developer.ts');
   const [openTabs, setOpenTabs] = useState<TabName[]>(['developer.ts', 'styles.css', 'README.md']);
   const [activeView, setActiveView] = useState<ViewName>('EXPLORER');
-  const [sidebarWidth] = useState(260); 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-  // Terminal State
+  // Responsive Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Terminal & Execution State
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [buildStep, setBuildStep] = useState(0);
+  const [showToast, setShowToast] = useState(false);
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,13 +160,26 @@ const Section1 = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // --- Keyboard Shortcuts ---
+  // --- Effects ---
+
+  // Detect Mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setIsSidebarOpen(false); // Close sidebar by default on mobile
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         setUnsavedChanges(false);
-        // Trigger a fake "Save" notification or logic
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
@@ -188,7 +190,7 @@ const Section1 = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // --- Typing Effect for Developer.ts ---
+  // Typing Effect
   useEffect(() => {
     if (activeTab === 'developer.ts' && !isRunning && typedCode.length === 0) {
       setIsTypingComplete(false);
@@ -200,19 +202,23 @@ const Section1 = () => {
         if (i > code.length) {
           clearInterval(interval);
           setIsTypingComplete(true);
+          setTimeout(() => {
+            if (buildStep === 0) setShowToast(true);
+          }, 800);
         }
       }, 3); 
       return () => clearInterval(interval);
     } else {
         setIsTypingComplete(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // --- Handlers ---
   const handleTabClick = (tab: TabName) => {
     if (!openTabs.includes(tab)) setOpenTabs([...openTabs, tab]);
     setActiveTab(tab);
+    // On mobile, close sidebar after selecting a file to show code
+    if (isMobile) setIsSidebarOpen(false);
   };
 
   const handleCloseTab = (e: React.MouseEvent, tab: TabName) => {
@@ -227,9 +233,11 @@ const Section1 = () => {
   const handleRunCode = () => {
     if (isRunning) return;
     setIsRunning(true);
+    setShowToast(false);
     setIsTerminalOpen(true);
     setBuildStep(1);
     setTerminalLogs([]);
+    
     const steps = [
       { msg: "> pnpm run build", delay: 300 },
       { msg: "wait  - compiling...", delay: 1000 },
@@ -259,21 +267,26 @@ const Section1 = () => {
       case 'EXPLORER':
         return (
           <>
-            <div className="px-4 py-2 text-xs font-bold text-[#bbbbbb] flex justify-between items-center bg-[#000000]">
+            <div className="px-5 py-3 text-[11px] tracking-wide text-[#bbbbbb] flex justify-between items-center bg-transparent select-none">
               EXPLORER <MoreHorizontal size={14} />
             </div>
+            <div className="flex flex-col mb-1">
+               <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-[#2a2d2e] transition-colors">
+                 <ChevronRight size={14} /> <span className="text-[11px] font-bold">OPEN EDITORS</span>
+               </div>
+            </div>
             <div className="flex flex-col">
-              <div className="px-2 py-1 flex items-center gap-1 text-white font-bold cursor-pointer bg-[#2a2d2e]/50">
-                <ChevronDown size={14} /> <span>PORTFOLIO</span>
+              <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-[#2a2d2e] transition-colors">
+                <ChevronDown size={14} /> <span className="text-[11px] font-bold">PORTFOLIO</span>
               </div>
               {Object.keys(FILES_CONTENT).map((file) => (
                 <div 
                   key={file}
                   onClick={() => handleTabClick(file as TabName)}
-                  className={`pl-6 py-1 flex items-center gap-2 cursor-pointer transition-colors border-l-2 text-[13px]
+                  className={`pl-5 py-1 flex items-center gap-1.5 cursor-pointer transition-colors text-[13px] border-l-[3px]
                     ${activeTab === file ? 'bg-[#37373d] text-white border-[#007acc]' : 'border-transparent text-[#cccccc] hover:bg-[#2a2d2e] hover:text-white'}`}
                 >
-                   {file.endsWith('ts') && <FileJson size={14} className="text-[#f1e05a]" />}
+                   {file.endsWith('ts') && <FileJson size={14} className="text-[#3178c6]" />}
                    {file.endsWith('css') && <Hash size={14} className="text-[#569cd6]" />}
                    {file.endsWith('md') && <LayoutTemplate size={14} className="text-[#cccccc]" />}
                    <span>{file}</span>
@@ -285,18 +298,18 @@ const Section1 = () => {
       case 'SEARCH':
         return (
           <>
-             <div className="px-4 py-3 text-xs font-bold text-[#bbbbbb]">SEARCH</div>
+             <div className="px-5 py-3 text-[11px] tracking-wide text-[#bbbbbb] flex justify-between">SEARCH</div>
              <div className="px-4 mb-4">
-               <div className="bg-[#3c3c3c] flex items-center px-2 py-1 rounded border border-[#3c3c3c] focus-within:border-[#007acc]">
+               <div className="bg-[#3c3c3c] flex items-center px-2 py-1 rounded-sm border border-transparent focus-within:border-[#007acc] ring-1 ring-transparent focus-within:ring-[#007acc]">
                  <input 
                    type="text" 
                    placeholder="Search" 
-                   className="bg-transparent border-none outline-none text-white w-full text-xs placeholder:text-[#858585]"
+                   className="bg-transparent border-none outline-none text-white w-full text-[13px] placeholder:text-[#858585]"
                    value={searchQuery}
                    onChange={(e) => setSearchQuery(e.target.value)}
                  />
                  <div className="flex gap-1">
-                   <span className="text-[10px] text-[#858585] border border-[#858585] rounded px-1">Ab</span>
+                   <span className="text-[10px] text-[#858585] border border-[#555] rounded px-1">.*</span>
                  </div>
                </div>
              </div>
@@ -319,151 +332,122 @@ const Section1 = () => {
              )}
           </>
         );
-      case 'SCM':
-         return (
-           <>
-             <div className="px-4 py-3 text-xs font-bold text-[#bbbbbb] flex justify-between">
-                <span>SOURCE CONTROL</span>
-                <div className="flex gap-2"><CheckCircle2 size={14}/><MoreHorizontal size={14}/></div>
-             </div>
-             <div className="px-4 mb-2">
-                <div className="bg-[#3c3c3c] px-2 py-1.5 rounded text-xs text-[#858585] italic">Message (Ctrl+Enter to commit)</div>
-             </div>
-             <div className="px-4 text-xs font-bold text-[#bbbbbb] mb-2 mt-4">COMMITS</div>
-             <div className="flex flex-col relative">
-                {MOCK_COMMITS.map((commit, i) => (
-                  <div key={i} className="px-4 py-2 border-l border-[#333] ml-4 relative cursor-pointer hover:bg-[#2a2d2e]">
-                     <div className="absolute -left-[5px] top-3 w-2.5 h-2.5 rounded-full bg-[#007acc] border-2 border-[#1e1e1e]"></div>
-                     <div className="text-white truncate font-medium">{commit.msg}</div>
-                     <div className="flex justify-between text-[10px] text-[#858585] mt-1">
-                       <span>{commit.hash}</span>
-                       <span>{commit.time}</span>
-                     </div>
-                  </div>
-                ))}
-             </div>
-           </>
-         );
-      case 'EXTENSIONS':
-         return (
-            <>
-              <div className="px-4 py-3 text-xs font-bold text-[#bbbbbb]">EXTENSIONS</div>
-              <div className="px-4 mb-3">
-                 <input type="text" placeholder="Search Extensions in Marketplace" className="w-full bg-[#3c3c3c] px-2 py-1 rounded text-xs text-white outline-none focus:ring-1 ring-[#007acc]" />
-              </div>
-              <div className="flex flex-col">
-                 {EXTENSIONS.map((ext, i) => (
-                   <div key={i} className="px-4 py-2 flex gap-3 hover:bg-[#2a2d2e] cursor-pointer group">
-                      <div className="w-8 h-8 bg-[#333] flex items-center justify-center text-[#007acc] font-bold text-xs rounded">
-                         {ext.name.substring(0, 2)}
-                      </div>
-                      <div className="flex-1">
-                         <div className="flex justify-between items-center">
-                            <span className="text-white text-xs font-bold">{ext.name}</span>
-                            <span className="text-[10px] bg-[#252526] px-1 rounded text-[#858585]">v1.0</span>
-                         </div>
-                         <div className="text-[10px] text-[#858585]">{ext.desc}</div>
-                         <div className="flex gap-2 mt-1">
-                            <button className="bg-[#0e639c] text-white text-[10px] px-2 py-0.5 rounded">Install</button>
-                         </div>
-                      </div>
-                   </div>
-                 ))}
-              </div>
-            </>
-         );
       default: return null;
     }
   };
 
   return (
-    <section className="relative w-full h-screen bg-[#030303] text-[#cccccc] flex overflow-hidden font-sans selection:bg-[#264f78] selection:text-white">
+    <section className="relative w-full h-screen bg-transparent text-[#cccccc] flex overflow-hidden font-sans selection:bg-[#264f78] selection:text-white z-10">
       
-      {/* --- ADDED: Matching Cyberpunk Grid Background from Section 2 --- */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none perspective-500 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-        {/* Glow Orbs - adjusted for top section */}
-        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-cyan-900/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-900/10 rounded-full blur-[120px]" />
-      </div>
-      
-      {/* 1. ACTIVITY BAR (Leftmost) */}
-      <div className="hidden md:flex flex-col w-12 bg-[#000000] border-r border-[#333] items-center py-3 gap-4 z-30 select-none">
+      {/* 1. ACTIVITY BAR (Hidden on Mobile) */}
+      <div className="hidden md:flex flex-col w-12 bg-[#18181b]/95 backdrop-blur-md border-r border-[#2b2b2b] items-center py-3 gap-2 z-30 select-none">
         <Tooltip text="Explorer (Ctrl+Shift+E)">
-           <Files size={24} className={`cursor-pointer transition-colors ${activeView === 'EXPLORER' && isSidebarOpen ? 'text-white' : 'text-[#666] hover:text-[#bbb]'}`} onClick={() => { setActiveView('EXPLORER'); setIsSidebarOpen(true); }} />
+           <div className={`p-2 border-l-2 ${activeView === 'EXPLORER' && isSidebarOpen ? 'border-white' : 'border-transparent'}`}>
+             <Files size={24} strokeWidth={1.5} className={`cursor-pointer transition-colors ${activeView === 'EXPLORER' && isSidebarOpen ? 'text-white' : 'text-[#858585] hover:text-white'}`} onClick={() => { setActiveView('EXPLORER'); setIsSidebarOpen(true); }} />
+           </div>
         </Tooltip>
         <Tooltip text="Search (Ctrl+Shift+F)">
-           <Search size={24} className={`cursor-pointer transition-colors ${activeView === 'SEARCH' && isSidebarOpen ? 'text-white' : 'text-[#666] hover:text-[#bbb]'}`} onClick={() => { setActiveView('SEARCH'); setIsSidebarOpen(true); }} />
+           <div className={`p-2 border-l-2 ${activeView === 'SEARCH' && isSidebarOpen ? 'border-white' : 'border-transparent'}`}>
+             <Search size={24} strokeWidth={1.5} className={`cursor-pointer transition-colors ${activeView === 'SEARCH' && isSidebarOpen ? 'text-white' : 'text-[#858585] hover:text-white'}`} onClick={() => { setActiveView('SEARCH'); setIsSidebarOpen(true); }} />
+           </div>
         </Tooltip>
         <Tooltip text="Source Control (Ctrl+Shift+G)">
-           <GitGraph size={24} className={`cursor-pointer transition-colors ${activeView === 'SCM' && isSidebarOpen ? 'text-white' : 'text-[#666] hover:text-[#bbb]'}`} onClick={() => { setActiveView('SCM'); setIsSidebarOpen(true); }} />
+           <div className={`p-2 border-l-2 ${activeView === 'SCM' && isSidebarOpen ? 'border-white' : 'border-transparent'}`}>
+             <GitGraph size={24} strokeWidth={1.5} className={`cursor-pointer transition-colors ${activeView === 'SCM' && isSidebarOpen ? 'text-white' : 'text-[#858585] hover:text-white'}`} onClick={() => { setActiveView('SCM'); setIsSidebarOpen(true); }} />
+           </div>
         </Tooltip>
         <Tooltip text="Extensions (Ctrl+Shift+X)">
-           <Bug size={24} className={`cursor-pointer transition-colors ${activeView === 'EXTENSIONS' && isSidebarOpen ? 'text-white' : 'text-[#666] hover:text-[#bbb]'}`} onClick={() => { setActiveView('EXTENSIONS'); setIsSidebarOpen(true); }} />
+           <div className={`p-2 border-l-2 ${activeView === 'EXTENSIONS' && isSidebarOpen ? 'border-white' : 'border-transparent'}`}>
+             <Bug size={24} strokeWidth={1.5} className={`cursor-pointer transition-colors ${activeView === 'EXTENSIONS' && isSidebarOpen ? 'text-white' : 'text-[#858585] hover:text-white'}`} onClick={() => { setActiveView('EXTENSIONS'); setIsSidebarOpen(true); }} />
+           </div>
         </Tooltip>
         
-        <div className="mt-auto flex flex-col gap-6 mb-2">
+        <div className="mt-auto flex flex-col gap-4 mb-2">
+          <Tooltip text="Accounts">
+             <div className="p-2">
+                <div className="w-6 h-6 rounded-full bg-[#007acc] text-white text-[10px] flex items-center justify-center font-bold">PS</div>
+             </div>
+          </Tooltip>
           <Tooltip text="Settings">
-             <Settings size={24} className="text-[#666] hover:text-white transition-colors cursor-pointer" />
+             <div className="p-2">
+                <Settings size={24} strokeWidth={1.5} className="text-[#858585] hover:text-white transition-colors cursor-pointer" />
+             </div>
           </Tooltip>
         </div>
       </div>
 
-      {/* 2. SIDEBAR PANEL */}
+      {/* 2. SIDEBAR PANEL (Responsive: Absolute on mobile, Relative on Desktop) */}
       <motion.div 
         initial={false}
-        animate={{ width: isSidebarOpen ? sidebarWidth : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="hidden md:flex flex-col bg-[#000000] border-r border-[#333] overflow-hidden whitespace-nowrap z-20 h-full"
+        animate={{ width: isSidebarOpen ? (isMobile ? 240 : 260) : 0, opacity: isSidebarOpen ? 1 : 0 }}
+        className={`flex flex-col bg-[#1e1e1e]/95 backdrop-blur-md border-r border-[#2b2b2b] overflow-hidden whitespace-nowrap z-40 h-full
+          ${isMobile ? 'absolute top-0 left-0 shadow-2xl' : 'relative'}
+        `}
       >
         {renderSidebarContent()}
       </motion.div>
 
-      {/* 3. MAIN EDITOR AREA - Updated background to be slightly transparent to show grid */}
-      <div className="flex-1 flex flex-col h-full relative bg-[#1e1e1e]/90 backdrop-blur-sm z-10 min-w-0">
+      {/* Overlay for mobile when sidebar is open */}
+      {isMobile && isSidebarOpen && (
+        <div className="absolute inset-0 bg-black/50 z-30" onClick={() => setIsSidebarOpen(false)} />
+      )}
+
+      {/* 3. MAIN EDITOR AREA */}
+      <div className="flex-1 flex flex-col h-full relative bg-[#1e1e1e]/70 backdrop-blur-sm z-10 min-w-0">
         
         {/* TABS BAR */}
-        <div className="flex bg-[#000000] h-9 items-center overflow-x-auto no-scrollbar border-b border-[#333] select-none">
-           <div className="md:hidden px-4 h-full flex items-center justify-center text-[#cccccc] cursor-pointer" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        <div className="flex bg-[#18181b]/60 h-9 items-center border-b border-[#2b2b2b] select-none">
+           {/* Mobile Hamburger */}
+           <div className="md:hidden px-3 h-full flex items-center justify-center text-[#cccccc] cursor-pointer hover:bg-[#2d2d2d]" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
              <Menu size={16} />
            </div>
 
-           {openTabs.map((tabName) => (
+           {/* Scrollable Tabs Container */}
+           <div className="flex flex-1 overflow-x-auto no-scrollbar h-full">
+             {openTabs.map((tabName) => (
+               <div 
+                 key={tabName}
+                 onClick={() => setActiveTab(tabName)}
+                 className={`group flex items-center gap-2 px-3 h-full text-[13px] cursor-pointer border-r border-[#2b2b2b] min-w-fit transition-colors relative
+                   ${activeTab === tabName ? 'bg-[#1e1e1e]/60 text-white' : 'bg-transparent text-[#999] hover:bg-[#2d2d2d]'}`}
+               >
+                  {tabName === 'developer.ts' && <FileJson size={14} className="text-[#3178c6]" />}
+                  {tabName === 'styles.css' && <Hash size={14} className="text-[#569cd6]" />}
+                  {tabName === 'README.md' && <LayoutTemplate size={14} className="text-[#cccccc]" />}
+                  <span>{tabName}</span>
+                  <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-[#444] ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
+               </div>
+             ))}
+           </div>
+           
+           {/* Editor Toolbar */}
+           <div className="flex-shrink-0 flex items-center gap-3 px-3 h-full bg-[#18181b]/60 border-l border-[#2b2b2b]">
+             {/* Pulsing Play Button */}
              <div 
-               key={tabName}
-               onClick={() => setActiveTab(tabName)}
-               className={`group flex items-center gap-2 px-3 h-full text-[13px] cursor-pointer border-r border-[#333] min-w-fit transition-colors relative
-                 ${activeTab === tabName ? 'bg-[#1e1e1e]/50 text-white border-t-2 border-t-[#007acc]' : 'bg-[#000000] text-[#999] border-t-2 border-t-transparent hover:bg-[#1e1e1e]/50'}`}
+               className={`flex items-center justify-center w-6 h-6 rounded cursor-pointer transition-all duration-300 ${showToast ? 'bg-[#007acc] shadow-[0_0_10px_rgba(0,122,204,0.8)] animate-pulse' : 'hover:bg-[#333]'}`} 
+               onClick={handleRunCode}
              >
-                {tabName === 'developer.ts' && <FileJson size={14} className="text-[#f1e05a]" />}
-                {tabName === 'styles.css' && <Hash size={14} className="text-[#569cd6]" />}
-                {tabName === 'README.md' && <LayoutTemplate size={14} className="text-[#cccccc]" />}
-                <span>{tabName}</span>
-                {/* Unsaved indicator or Close button */}
-                {activeTab === tabName && unsavedChanges ? (
-                   <div className="w-2 h-2 rounded-full bg-white ml-2 group-hover:hidden"></div>
-                ) : null}
-                <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-[#444] ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
+                {isRunning ? <Loader2 size={14} className="animate-spin text-white" /> : <Play size={14} className={`${showToast ? 'text-white fill-white' : 'text-[#cccccc] fill-[#cccccc]'}`} />}
              </div>
-           ))}
+             <div className="hidden sm:flex gap-3">
+               <Split size={14} className="text-[#cccccc] hover:bg-[#333] cursor-pointer" />
+               <MoreVertical size={14} className="text-[#cccccc] hover:bg-[#333] cursor-pointer" />
+             </div>
+           </div>
         </div>
 
         {/* BREADCRUMBS */}
-        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-[#1e1e1e] shadow-sm">
+        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-[#1e1e1e]/40 shadow-sm border-b border-transparent overflow-hidden whitespace-nowrap">
            <span>portfolio</span> <ChevronRight size={10} /> <span>src</span> <ChevronRight size={10} /> <span className="text-white/80">{activeTab}</span>
         </div>
 
         {/* EDITOR CONTENT */}
-        <div className="flex-1 relative flex overflow-hidden bg-[#1e1e1e]/0">
-          {/* Line Numbers */}
-          <div className="hidden sm:block w-12 pr-4 pt-4 text-[#6e7681] text-[13px] font-mono text-right select-none bg-[#1e1e1e]/50">
-            {/* Auto-generated based on lines */}
-          </div>
-
-          <div className="flex-1 pt-4 pl-0 overflow-auto custom-scrollbar" onClick={() => { if(!isRunning) setUnsavedChanges(true); }}>
+        <div className="flex-1 relative flex overflow-hidden bg-transparent">
+          <div className="flex-1 pt-2 pl-0 overflow-auto custom-scrollbar" onClick={() => { if(!isRunning) setUnsavedChanges(true); }}>
             <motion.div
               key={activeTab} 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.1 }}
-              className="min-h-full"
+              className="min-h-full pb-20 md:pb-0" // Extra padding for mobile scroll
             >
               <CodeRenderer 
                 code={activeTab === 'developer.ts' ? (isTypingComplete ? FILES_CONTENT['developer.ts'] : typedCode) : FILES_CONTENT[activeTab]} 
@@ -472,59 +456,95 @@ const Section1 = () => {
             </motion.div>
           </div>
           
-          {/* Minimap (Visual Only) */}
-          <div className="hidden lg:block w-20 bg-[#1e1e1e]/30 overflow-hidden opacity-30 select-none pointer-events-none absolute right-0 top-0 bottom-0 border-l border-[#333]/50">
+          {/* Minimap (Desktop Only) */}
+          <div className="hidden lg:block w-16 bg-[#1e1e1e]/20 overflow-hidden opacity-50 select-none pointer-events-none absolute right-0 top-0 bottom-0">
               <div className="transform scale-[0.1] origin-top-left p-2">
                  <pre className="text-white">{FILES_CONTENT[activeTab]}</pre>
               </div>
           </div>
         </div>
 
-        {/* --- ACTION OVERLAY (Play/Success) --- */}
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="absolute bottom-12 right-12 z-40">
-           {buildStep === 2 ? (
-              <motion.button
-                onClick={handleScrollDown}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-3 px-6 py-3 bg-green-600 text-white shadow-2xl rounded-md cursor-pointer border border-green-500"
-              >
-                 <CheckCircle2 size={20} /> <span className="font-bold">View Deployment</span> <ArrowRight size={20} />
-              </motion.button>
-           ) : (
-              <motion.button
-                 onClick={handleRunCode}
-                 disabled={isRunning}
-                 whileHover={{ scale: 1.05 }}
-                 whileTap={{ scale: 0.95 }}
-                 className={`flex items-center gap-3 px-6 py-3 rounded-md font-bold shadow-2xl border border-white/10 ${isRunning ? 'bg-[#007acc]/80 cursor-not-allowed' : 'bg-[#007acc] hover:bg-[#006bb3] text-white cursor-pointer'}`}
-              >
-                 {isRunning ? <Loader2 size={20} className="animate-spin" /> : <Play size={20} fill="currentColor" />}
-                 <span>{isRunning ? 'Compiling...' : 'Run Build'}</span>
-              </motion.button>
-           )}
-        </motion.div>
+        {/* --- PROFESSIONAL BUILD NOTIFICATION (Animated & Responsive) --- */}
+        <AnimatePresence>
+          {showToast && (
+            <motion.div 
+              initial={{ x: 300, opacity: 0 }} 
+              animate={{ x: 0, opacity: 1 }} 
+              exit={{ x: 300, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="absolute bottom-12 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 z-50 bg-[#252526] border border-[#454545] shadow-2xl rounded-sm w-[90%] max-w-[320px] overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-3 py-2 bg-[#1e1e1e] border-b border-[#333]">
+                 <span className="text-[11px] font-bold text-white flex items-center gap-2">
+                   <Terminal size={12} className="text-[#007acc]" /> Build Configuration
+                 </span>
+                 <X size={12} className="cursor-pointer hover:text-white text-[#858585]" onClick={() => setShowToast(false)}/>
+              </div>
+              <div className="p-3 text-[12px] text-[#cccccc]">
+                 <p className="mb-3 leading-relaxed">The workspace contains a new configuration. Would you like to run the build task to preview?</p>
+                 <div className="flex gap-2">
+                   <button 
+                     onClick={handleRunCode}
+                     className="bg-[#007acc] hover:bg-[#006bb3] text-white px-3 py-1.5 rounded-sm text-[11px] font-semibold transition-all shadow-[0_0_10px_rgba(0,122,204,0.3)] animate-pulse"
+                   >
+                     Run Build Task
+                   </button>
+                   <button 
+                     onClick={() => setShowToast(false)}
+                     className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white px-3 py-1.5 rounded-sm text-[11px] font-medium transition-colors"
+                   >
+                     Dismiss
+                   </button>
+                 </div>
+              </div>
+              <motion.div 
+                 initial={{ width: "100%" }} 
+                 animate={{ width: "0%" }} 
+                 transition={{ duration: 10, ease: "linear" }}
+                 className="h-0.5 bg-[#007acc]"
+                 onAnimationComplete={() => setShowToast(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Success Toast */}
+        <AnimatePresence>
+          {buildStep === 2 && (
+             <motion.div 
+               initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+               className="absolute bottom-12 right-6 md:right-6 z-50 w-[90%] md:w-auto left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0"
+             >
+                <button
+                  onClick={handleScrollDown}
+                  className="bg-[#007acc] text-white px-4 py-3 md:py-2 rounded-sm shadow-xl flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#006bb3] w-full md:w-auto"
+                >
+                  <CheckCircle2 size={14} /> Deployment Complete. Open Preview.
+                </button>
+             </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* TERMINAL PANEL */}
         <AnimatePresence>
           {isTerminalOpen && (
             <motion.div
               initial={{ y: 250 }} animate={{ y: 0 }} exit={{ y: 250 }} transition={{ type: "spring", damping: 20 }}
-              className="absolute bottom-0 left-0 right-0 h-[250px] bg-[#1e1e1e] border-t border-[#333] z-30 shadow-2xl"
+              className="absolute bottom-0 left-0 right-0 h-[40vh] md:h-[200px] bg-[#1e1e1e] border-t border-[#2b2b2b] z-30 shadow-2xl"
             >
-              <div className="flex items-center px-4 gap-6 text-[11px] font-bold text-[#666] border-b border-[#333] h-8 select-none">
+              <div className="flex items-center px-4 gap-6 text-[11px] font-bold text-[#666] border-b border-[#2b2b2b] h-8 select-none">
                  <span className="text-white border-b border-white h-full flex items-center cursor-pointer uppercase">Terminal</span>
-                 <span className="hover:text-white cursor-pointer h-full flex items-center uppercase">Output</span>
-                 <span className="hover:text-white cursor-pointer h-full flex items-center uppercase">Debug Console</span>
+                 <span className="hidden sm:flex hover:text-white cursor-pointer h-full items-center uppercase">Output</span>
+                 <span className="hidden sm:flex hover:text-white cursor-pointer h-full items-center uppercase">Debug Console</span>
                  <div className="ml-auto flex gap-3">
                     <Minus size={14} className="cursor-pointer hover:text-white" onClick={() => setIsTerminalOpen(false)} />
                     <X size={14} className="cursor-pointer hover:text-white" onClick={() => setIsTerminalOpen(false)} />
                  </div>
               </div>
-              <div ref={scrollRef} className="p-4 font-mono text-sm overflow-y-auto h-[calc(100%-32px)] custom-scrollbar">
+              <div ref={scrollRef} className="p-4 font-mono text-[12px] overflow-y-auto h-[calc(100%-32px)] custom-scrollbar">
                  <div className="text-[#cccccc] mb-2">Microsoft Windows [Version 10.0.19045]</div>
                  {terminalLogs.map((log, i) => (
-                    <div key={i} className="mt-0.5">
+                    <div key={i} className="mt-0.5 break-words">
                        {log.startsWith('>') ? <span className="text-[#dcdcaa]">{log}</span> : 
                         log.startsWith('wait') ? <span className="text-white">{log}</span> :
                         log.startsWith('event') ? <span className="text-[#4ec9b0]">{log}</span> :
@@ -550,9 +570,10 @@ const Section1 = () => {
            </div>
            <div className="flex items-center gap-3">
               <span className="hidden sm:block">Ln {FILES_CONTENT[activeTab].split('\n').length}, Col 1</span>
-              <span>UTF-8</span>
-              <span>{activeTab.endsWith('ts') ? 'TypeScript' : activeTab.endsWith('css') ? 'CSS' : 'Markdown'}</span>
-              <span className="hover:bg-white/20 px-1 rounded cursor-pointer"><CheckCircle2 size={12}/> Prettier</span>
+              <span className="hidden sm:block">UTF-8</span>
+              <span>{activeTab.endsWith('ts') ? 'TS' : activeTab.endsWith('css') ? 'CSS' : 'MD'}</span>
+              <span className="hover:bg-white/20 px-1 rounded cursor-pointer"><Bell size={12}/></span>
+              <span className="hidden sm:block hover:bg-white/20 px-1 rounded cursor-pointer"><CheckCircle2 size={12}/> Prettier</span>
            </div>
         </div>
 
