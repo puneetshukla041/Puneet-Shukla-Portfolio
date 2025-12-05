@@ -83,7 +83,7 @@ const Tooltip = ({ text, children }: { text: string, children: React.ReactNode }
         {show && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-            className="hidden md:block absolute left-14 px-2 py-1 bg-[#252526] text-[#cccccc] text-[11px] border border-[#454545] shadow-xl z-50 whitespace-nowrap pointer-events-none"
+            className="hidden md:block absolute left-14 px-2 py-1 bg-[#252526] text-[#cccccc] text-[11px] border border-white/10 shadow-xl z-50 whitespace-nowrap pointer-events-none"
           >
             {text}
           </motion.div>
@@ -271,12 +271,12 @@ const Section1 = () => {
               EXPLORER <MoreHorizontal size={14} />
             </div>
             <div className="flex flex-col mb-1">
-               <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-[#2a2d2e] transition-colors">
+               <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-white/5 transition-colors">
                  <ChevronRight size={14} /> <span className="text-[11px] font-bold">OPEN EDITORS</span>
                </div>
             </div>
             <div className="flex flex-col">
-              <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-[#2a2d2e] transition-colors">
+              <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-white/5 transition-colors">
                 <ChevronDown size={14} /> <span className="text-[11px] font-bold">PORTFOLIO</span>
               </div>
               {Object.keys(FILES_CONTENT).map((file) => (
@@ -284,7 +284,7 @@ const Section1 = () => {
                   key={file}
                   onClick={() => handleTabClick(file as TabName)}
                   className={`pl-5 py-1 flex items-center gap-1.5 cursor-pointer transition-colors text-[13px] border-l-[3px]
-                    ${activeTab === file ? 'bg-[#37373d] text-white border-[#007acc]' : 'border-transparent text-[#cccccc] hover:bg-[#2a2d2e] hover:text-white'}`}
+                    ${activeTab === file ? 'bg-white/10 text-white border-[#007acc]' : 'border-transparent text-[#cccccc] hover:bg-white/5 hover:text-white'}`}
                 >
                    {file.endsWith('ts') && <FileJson size={14} className="text-[#3178c6]" />}
                    {file.endsWith('css') && <Hash size={14} className="text-[#569cd6]" />}
@@ -300,7 +300,7 @@ const Section1 = () => {
           <>
              <div className="px-5 py-3 text-[11px] tracking-wide text-[#bbbbbb] flex justify-between">SEARCH</div>
              <div className="px-4 mb-4">
-               <div className="bg-[#3c3c3c] flex items-center px-2 py-1 rounded-sm border border-transparent focus-within:border-[#007acc] ring-1 ring-transparent focus-within:ring-[#007acc]">
+               <div className="bg-neutral-900 flex items-center px-2 py-1 rounded-sm border border-transparent focus-within:border-[#007acc] ring-1 ring-transparent focus-within:ring-[#007acc]">
                  <input 
                    type="text" 
                    placeholder="Search" 
@@ -340,7 +340,7 @@ const Section1 = () => {
     <section className="relative w-full h-screen bg-transparent text-[#cccccc] flex overflow-hidden font-sans selection:bg-[#264f78] selection:text-white z-10">
       
       {/* 1. ACTIVITY BAR (Hidden on Mobile) */}
-      <div className="hidden md:flex flex-col w-12 bg-[#18181b]/95 backdrop-blur-md border-r border-[#2b2b2b] items-center py-3 gap-2 z-30 select-none">
+      <div className="hidden md:flex flex-col w-12 bg-transparent border-r border-white/10 items-center py-3 gap-2 z-30 select-none">
         <Tooltip text="Explorer (Ctrl+Shift+E)">
            <div className={`p-2 border-l-2 ${activeView === 'EXPLORER' && isSidebarOpen ? 'border-white' : 'border-transparent'}`}>
              <Files size={24} strokeWidth={1.5} className={`cursor-pointer transition-colors ${activeView === 'EXPLORER' && isSidebarOpen ? 'text-white' : 'text-[#858585] hover:text-white'}`} onClick={() => { setActiveView('EXPLORER'); setIsSidebarOpen(true); }} />
@@ -380,7 +380,7 @@ const Section1 = () => {
       <motion.div 
         initial={false}
         animate={{ width: isSidebarOpen ? (isMobile ? 240 : 260) : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className={`flex flex-col bg-[#1e1e1e]/95 backdrop-blur-md border-r border-[#2b2b2b] overflow-hidden whitespace-nowrap z-40 h-full
+        className={`flex flex-col bg-neutral-950/90 border-r border-white/10 overflow-hidden whitespace-nowrap z-40 h-full
           ${isMobile ? 'absolute top-0 left-0 shadow-2xl' : 'relative'}
         `}
       >
@@ -393,12 +393,12 @@ const Section1 = () => {
       )}
 
       {/* 3. MAIN EDITOR AREA */}
-      <div className="flex-1 flex flex-col h-full relative bg-[#1e1e1e]/70 backdrop-blur-sm z-10 min-w-0">
+      <div className="flex-1 flex flex-col h-full relative bg-transparent z-10 min-w-0">
         
         {/* TABS BAR */}
-        <div className="flex bg-[#18181b]/60 h-9 items-center border-b border-[#2b2b2b] select-none">
+        <div className="flex bg-transparent h-9 items-center border-b border-white/10 select-none">
            {/* Mobile Hamburger */}
-           <div className="md:hidden px-3 h-full flex items-center justify-center text-[#cccccc] cursor-pointer hover:bg-[#2d2d2d]" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+           <div className="md:hidden px-3 h-full flex items-center justify-center text-[#cccccc] cursor-pointer hover:bg-white/10" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
              <Menu size={16} />
            </div>
 
@@ -408,36 +408,36 @@ const Section1 = () => {
                <div 
                  key={tabName}
                  onClick={() => setActiveTab(tabName)}
-                 className={`group flex items-center gap-2 px-3 h-full text-[13px] cursor-pointer border-r border-[#2b2b2b] min-w-fit transition-colors relative
-                   ${activeTab === tabName ? 'bg-[#1e1e1e]/60 text-white' : 'bg-transparent text-[#999] hover:bg-[#2d2d2d]'}`}
+                 className={`group flex items-center gap-2 px-3 h-full text-[13px] cursor-pointer border-r border-white/10 min-w-fit transition-colors relative
+                   ${activeTab === tabName ? 'bg-white/10 text-white' : 'bg-transparent text-[#999] hover:bg-white/5'}`}
                >
                   {tabName === 'developer.ts' && <FileJson size={14} className="text-[#3178c6]" />}
                   {tabName === 'styles.css' && <Hash size={14} className="text-[#569cd6]" />}
                   {tabName === 'README.md' && <LayoutTemplate size={14} className="text-[#cccccc]" />}
                   <span>{tabName}</span>
-                  <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-[#444] ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
+                  <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-white/10 ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
                </div>
              ))}
            </div>
            
            {/* Editor Toolbar */}
-           <div className="flex-shrink-0 flex items-center gap-3 px-3 h-full bg-[#18181b]/60 border-l border-[#2b2b2b]">
+           <div className="flex-shrink-0 flex items-center gap-3 px-3 h-full bg-transparent border-l border-white/10">
              {/* Pulsing Play Button */}
              <div 
-               className={`flex items-center justify-center w-6 h-6 rounded cursor-pointer transition-all duration-300 ${showToast ? 'bg-[#007acc] shadow-[0_0_10px_rgba(0,122,204,0.8)] animate-pulse' : 'hover:bg-[#333]'}`} 
+               className={`flex items-center justify-center w-6 h-6 rounded cursor-pointer transition-all duration-300 ${showToast ? 'bg-[#007acc] shadow-[0_0_10px_rgba(0,122,204,0.8)] animate-pulse' : 'hover:bg-white/10'}`} 
                onClick={handleRunCode}
              >
                 {isRunning ? <Loader2 size={14} className="animate-spin text-white" /> : <Play size={14} className={`${showToast ? 'text-white fill-white' : 'text-[#cccccc] fill-[#cccccc]'}`} />}
              </div>
              <div className="hidden sm:flex gap-3">
-               <Split size={14} className="text-[#cccccc] hover:bg-[#333] cursor-pointer" />
-               <MoreVertical size={14} className="text-[#cccccc] hover:bg-[#333] cursor-pointer" />
+               <Split size={14} className="text-[#cccccc] hover:bg-white/10 cursor-pointer" />
+               <MoreVertical size={14} className="text-[#cccccc] hover:bg-white/10 cursor-pointer" />
              </div>
            </div>
         </div>
 
         {/* BREADCRUMBS */}
-        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-[#1e1e1e]/40 shadow-sm border-b border-transparent overflow-hidden whitespace-nowrap">
+        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-transparent shadow-sm border-b border-transparent overflow-hidden whitespace-nowrap">
            <span>portfolio</span> <ChevronRight size={10} /> <span>src</span> <ChevronRight size={10} /> <span className="text-white/80">{activeTab}</span>
         </div>
 
@@ -457,7 +457,7 @@ const Section1 = () => {
           </div>
           
           {/* Minimap (Desktop Only) */}
-          <div className="hidden lg:block w-16 bg-[#1e1e1e]/20 overflow-hidden opacity-50 select-none pointer-events-none absolute right-0 top-0 bottom-0">
+          <div className="hidden lg:block w-16 bg-white/5 overflow-hidden opacity-50 select-none pointer-events-none absolute right-0 top-0 bottom-0">
               <div className="transform scale-[0.1] origin-top-left p-2">
                  <pre className="text-white">{FILES_CONTENT[activeTab]}</pre>
               </div>
@@ -472,9 +472,9 @@ const Section1 = () => {
               animate={{ x: 0, opacity: 1 }} 
               exit={{ x: 300, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute bottom-12 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 z-50 bg-[#252526] border border-[#454545] shadow-2xl rounded-sm w-[90%] max-w-[320px] overflow-hidden"
+              className="absolute bottom-12 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 z-50 bg-[#252526] border border-white/10 shadow-2xl rounded-sm w-[90%] max-w-[320px] overflow-hidden"
             >
-              <div className="flex items-center justify-between px-3 py-2 bg-[#1e1e1e] border-b border-[#333]">
+              <div className="flex items-center justify-between px-3 py-2 bg-neutral-900 border-b border-white/10">
                  <span className="text-[11px] font-bold text-white flex items-center gap-2">
                    <Terminal size={12} className="text-[#007acc]" /> Build Configuration
                  </span>
@@ -530,9 +530,9 @@ const Section1 = () => {
           {isTerminalOpen && (
             <motion.div
               initial={{ y: 250 }} animate={{ y: 0 }} exit={{ y: 250 }} transition={{ type: "spring", damping: 20 }}
-              className="absolute bottom-0 left-0 right-0 h-[40vh] md:h-[200px] bg-[#1e1e1e] border-t border-[#2b2b2b] z-30 shadow-2xl"
+              className="absolute bottom-0 left-0 right-0 h-[40vh] md:h-[200px] bg-neutral-900 border-t border-white/10 z-30 shadow-2xl"
             >
-              <div className="flex items-center px-4 gap-6 text-[11px] font-bold text-[#666] border-b border-[#2b2b2b] h-8 select-none">
+              <div className="flex items-center px-4 gap-6 text-[11px] font-bold text-[#666] border-b border-white/10 h-8 select-none">
                  <span className="text-white border-b border-white h-full flex items-center cursor-pointer uppercase">Terminal</span>
                  <span className="hidden sm:flex hover:text-white cursor-pointer h-full items-center uppercase">Output</span>
                  <span className="hidden sm:flex hover:text-white cursor-pointer h-full items-center uppercase">Debug Console</span>
