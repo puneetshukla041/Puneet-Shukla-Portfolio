@@ -211,6 +211,7 @@ const Section1 = () => {
     } else {
         setIsTypingComplete(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // --- Handlers ---
@@ -267,8 +268,8 @@ const Section1 = () => {
       case 'EXPLORER':
         return (
           <>
-            <div className="px-5 py-3 text-[11px] tracking-wide text-[#bbbbbb] flex justify-between items-center bg-transparent select-none">
-              EXPLORER <MoreHorizontal size={14} />
+            <div className="px-5 py-3 text-[11px] tracking-wide text-[#bbbbbb] flex justify-between items-center bg-transparent select-none cursor-pointer">
+              EXPLORER <MoreHorizontal size={14} className="cursor-pointer" />
             </div>
             <div className="flex flex-col mb-1">
                <div className="px-1 py-1 flex items-center gap-1 text-[#cccccc] font-bold cursor-pointer hover:bg-white/5 transition-colors">
@@ -309,7 +310,7 @@ const Section1 = () => {
                    onChange={(e) => setSearchQuery(e.target.value)}
                  />
                  <div className="flex gap-1">
-                   <span className="text-[10px] text-[#858585] border border-[#555] rounded px-1">.*</span>
+                   <span className="text-[10px] text-[#858585] border border-[#555] rounded px-1 cursor-pointer hover:text-white">.*</span>
                  </div>
                </div>
              </div>
@@ -318,11 +319,11 @@ const Section1 = () => {
                  {Object.entries(FILES_CONTENT).map(([name, content]) => {
                     const match = content.toLowerCase().includes(searchQuery.toLowerCase());
                     return match ? (
-                      <div key={name} className="mb-2" onClick={() => handleTabClick(name as TabName)}>
-                        <div className="flex items-center gap-2 font-bold cursor-pointer hover:text-white">
+                      <div key={name} className="mb-2 cursor-pointer group" onClick={() => handleTabClick(name as TabName)}>
+                        <div className="flex items-center gap-2 font-bold group-hover:text-white">
                           <ChevronRight size={12}/> {name}
                         </div>
-                        <div className="pl-6 text-[#858585] truncate opacity-70">
+                        <div className="pl-6 text-[#858585] truncate opacity-70 group-hover:opacity-100">
                           {content.substring(content.toLowerCase().indexOf(searchQuery.toLowerCase()), content.toLowerCase().indexOf(searchQuery.toLowerCase()) + 30)}...
                         </div>
                       </div>
@@ -364,13 +365,13 @@ const Section1 = () => {
         
         <div className="mt-auto flex flex-col gap-4 mb-2">
           <Tooltip text="Accounts">
-             <div className="p-2">
+             <div className="p-2 cursor-pointer">
                 <div className="w-6 h-6 rounded-full bg-[#007acc] text-white text-[10px] flex items-center justify-center font-bold">PS</div>
              </div>
           </Tooltip>
           <Tooltip text="Settings">
-             <div className="p-2">
-                <Settings size={24} strokeWidth={1.5} className="text-[#858585] hover:text-white transition-colors cursor-pointer" />
+             <div className="p-2 cursor-pointer">
+                <Settings size={24} strokeWidth={1.5} className="text-[#858585] hover:text-white transition-colors" />
              </div>
           </Tooltip>
         </div>
@@ -389,7 +390,7 @@ const Section1 = () => {
 
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && isSidebarOpen && (
-        <div className="absolute inset-0 bg-black/50 z-30" onClick={() => setIsSidebarOpen(false)} />
+        <div className="absolute inset-0 bg-black/50 z-30 cursor-pointer" onClick={() => setIsSidebarOpen(false)} />
       )}
 
       {/* 3. MAIN EDITOR AREA */}
@@ -415,7 +416,7 @@ const Section1 = () => {
                   {tabName === 'styles.css' && <Hash size={14} className="text-[#569cd6]" />}
                   {tabName === 'README.md' && <LayoutTemplate size={14} className="text-[#cccccc]" />}
                   <span>{tabName}</span>
-                  <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-white/10 ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
+                  <X size={14} className={`ml-2 rounded-sm p-[1px] hover:bg-white/10 cursor-pointer ${activeTab === tabName || unsavedChanges ? 'block' : 'hidden group-hover:block'}`} onClick={(e) => handleCloseTab(e, tabName)} />
                </div>
              ))}
            </div>
@@ -437,7 +438,7 @@ const Section1 = () => {
         </div>
 
         {/* BREADCRUMBS */}
-        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-transparent shadow-sm border-b border-transparent overflow-hidden whitespace-nowrap">
+        <div className="flex items-center gap-1 px-4 py-0.5 text-[11px] text-[#666] bg-transparent shadow-sm border-b border-transparent overflow-hidden whitespace-nowrap cursor-default">
            <span>portfolio</span> <ChevronRight size={10} /> <span>src</span> <ChevronRight size={10} /> <span className="text-white/80">{activeTab}</span>
         </div>
 
@@ -485,13 +486,13 @@ const Section1 = () => {
                  <div className="flex gap-2">
                    <button 
                      onClick={handleRunCode}
-                     className="bg-[#007acc] hover:bg-[#006bb3] text-white px-3 py-1.5 rounded-sm text-[11px] font-semibold transition-all shadow-[0_0_10px_rgba(0,122,204,0.3)] animate-pulse"
+                     className="bg-[#007acc] hover:bg-[#006bb3] text-white px-3 py-1.5 rounded-sm text-[11px] font-semibold transition-all shadow-[0_0_10px_rgba(0,122,204,0.3)] animate-pulse cursor-pointer"
                    >
                      Run Build Task
                    </button>
                    <button 
                      onClick={() => setShowToast(false)}
-                     className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white px-3 py-1.5 rounded-sm text-[11px] font-medium transition-colors"
+                     className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white px-3 py-1.5 rounded-sm text-[11px] font-medium transition-colors cursor-pointer"
                    >
                      Dismiss
                    </button>
@@ -517,7 +518,7 @@ const Section1 = () => {
              >
                 <button
                   onClick={handleScrollDown}
-                  className="bg-[#007acc] text-white px-4 py-3 md:py-2 rounded-sm shadow-xl flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#006bb3] w-full md:w-auto"
+                  className="bg-[#007acc] text-white px-4 py-3 md:py-2 rounded-sm shadow-xl flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#006bb3] w-full md:w-auto cursor-pointer"
                 >
                   <CheckCircle2 size={14} /> Deployment Complete. Open Preview.
                 </button>
@@ -553,9 +554,9 @@ const Section1 = () => {
                     </div>
                  ))}
                  {buildStep === 2 && (
-                    <div className="mt-4 text-[#4ec9b0]">
-                       Done in 4.82s. <span className="text-white animate-pulse">_</span>
-                    </div>
+                   <div className="mt-4 text-[#4ec9b0]">
+                      Done in 4.82s. <span className="text-white animate-pulse">_</span>
+                   </div>
                  )}
               </div>
             </motion.div>
@@ -563,17 +564,17 @@ const Section1 = () => {
         </AnimatePresence>
 
         {/* STATUS BAR */}
-        <div className="h-6 bg-[#007acc] text-white flex items-center px-3 text-[11px] justify-between z-40 select-none w-full absolute bottom-0">
+        <div className="h-6 bg-[#007acc] text-white flex items-center px-3 text-[11px] justify-between z-40 select-none w-full absolute bottom-0 cursor-default">
            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 hover:bg-white/20 px-1 rounded cursor-pointer"><GitGraph size={12}/> main*</span>
-              <span className="flex items-center gap-1 hover:bg-white/20 px-1 rounded cursor-pointer"><AlertCircle size={12}/> 0</span>
+             <span className="flex items-center gap-1 hover:bg-white/20 px-1 rounded cursor-pointer"><GitGraph size={12}/> main*</span>
+             <span className="flex items-center gap-1 hover:bg-white/20 px-1 rounded cursor-pointer"><AlertCircle size={12}/> 0</span>
            </div>
            <div className="flex items-center gap-3">
-              <span className="hidden sm:block">Ln {FILES_CONTENT[activeTab].split('\n').length}, Col 1</span>
-              <span className="hidden sm:block">UTF-8</span>
-              <span>{activeTab.endsWith('ts') ? 'TS' : activeTab.endsWith('css') ? 'CSS' : 'MD'}</span>
-              <span className="hover:bg-white/20 px-1 rounded cursor-pointer"><Bell size={12}/></span>
-              <span className="hidden sm:block hover:bg-white/20 px-1 rounded cursor-pointer"><CheckCircle2 size={12}/> Prettier</span>
+             <span className="hidden sm:block">Ln {FILES_CONTENT[activeTab].split('\n').length}, Col 1</span>
+             <span className="hidden sm:block">UTF-8</span>
+             <span>{activeTab.endsWith('ts') ? 'TS' : activeTab.endsWith('css') ? 'CSS' : 'MD'}</span>
+             <span className="hover:bg-white/20 px-1 rounded cursor-pointer"><Bell size={12}/></span>
+             <span className="hidden sm:block hover:bg-white/20 px-1 rounded cursor-pointer"><CheckCircle2 size={12}/> Prettier</span>
            </div>
         </div>
 
