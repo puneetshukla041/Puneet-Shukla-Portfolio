@@ -4,41 +4,71 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, SVGMotionProps, Variants, Transition } from 'framer-motion';
-import { Instagram, Linkedin, Github, ChevronRight, Code2, Palette, ArrowRight } from 'lucide-react';
+import { 
+  motion, 
+  AnimatePresence, 
+  useScroll, 
+  useMotionValueEvent,
+  SVGMotionProps, 
+  Variants,
+  Transition // <--- Added this import
+} from 'framer-motion';
+import { 
+  Instagram, 
+  Linkedin, 
+  Github, 
+  ChevronRight, 
+  Code2, 
+  Palette, 
+  ArrowRight,
+  Menu,
+  X
+} from 'lucide-react';
 
+// --- TYPES ---
 interface MenuItem {
   title: string;
   href: string;
   isButton?: boolean;
 }
 
-// Custom Hamburger Icon Component
-const Path = (props: SVGMotionProps<SVGPathElement>) => (
-  <motion.path
-    fill="transparent"
-    strokeWidth="2.5"
-    stroke="white"
-    strokeLinecap="round"
-    {...props}
-  />
-);
+// --- ANIMATION CONFIG ---
+// We explicitely type these as Transition to fix the build error
+const transitionSpring: Transition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 30
+};
+
+const bouncySpring: Transition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 25
+};
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { scrollY } = useScroll();
 
   // Mode Detection
   const isDeveloperMode = pathname?.includes('/developer');
 
   // UI States
-  const [sticky, setSticky] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
   const [isSwitching, setIsSwitching] = useState(false);
-  
-  // Visibility State
-  const [isVisible, setIsVisible] = useState(true);
+
+  // --- SCROLL LOGIC ---
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    // Only toggle the visual style (Glass effect), never hide the header
+    if (latest > 50) {
+      setScrolled(true);
+    } else {
+      setScrolled(false);
+    }
+  });
 
   // Toggle Logic
   const handleToggle = () => {
@@ -75,26 +105,28 @@ const Header = () => {
 
   // --- SCROLLSPY LOGIC ---
   useEffect(() => {
-    let sections: { id: string; name: string }[] = [];
-    if (isDeveloperMode) {
-      sections = [
-        { id: 'section-1', name: 'Home' },
-        { id: 'section-2', name: 'Experience' },
-        { id: 'section-3', name: 'Projects' },
-        { id: 'section-4', name: 'Skills' },
-        { id: 'section-5', name: 'Hire Me' }
-      ];
-    } else {
-      sections = [
+    const getSections = () => {
+      if (isDeveloperMode) {
+        return [
+          { id: 'section-1', name: 'Home' },
+          { id: 'section-2', name: 'Experience' },
+          { id: 'section-3', name: 'Projects' },
+          { id: 'section-4', name: 'Skills' },
+          { id: 'section-5', name: 'Hire Me' }
+        ];
+      }
+      return [
         { id: 'section-1', name: 'Home' },
         { id: 'section-2', name: 'Gallery' },
         { id: 'section-3', name: 'Films' },
         { id: 'section-5', name: 'Contact Us' }
       ];
-    }
+    };
 
     const handleScrollSpy = () => {
-      const scrollPosition = window.scrollY + 150;
+      const scrollPosition = window.scrollY + 200;
+      const sections = getSections();
+
       for (const section of sections) {
         const element = document.getElementById(section.id);
         if (element) {
@@ -109,7 +141,6 @@ const Header = () => {
     };
 
     window.addEventListener('scroll', handleScrollSpy);
-    handleScrollSpy(); 
     return () => window.removeEventListener('scroll', handleScrollSpy);
   }, [pathname, isDeveloperMode]);
 
@@ -126,221 +157,182 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
-  // Scroll Handler for Sticky & Visibility
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setSticky(currentScrollY > 20);
-      if (isDeveloperMode) {
-        const threshold = window.innerHeight / 2;
-        setIsVisible(currentScrollY > threshold || currentScrollY < 50);
-      } else {
-        setIsVisible(true);
-      }
-    };
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isDeveloperMode]);
-
-  const isItemActive = (item: MenuItem) => activeSection === item.title;
-
-  // --- Animation Variants ---
+  // --- ANIMATION VARIANTS ---
   const mobileMenuVariants: Variants = {
-    closed: { opacity: 0, height: 0, transition: { staggerChildren: 0.05, staggerDirection: -1 } },
-    open: { opacity: 1, height: '100vh', transition: { staggerChildren: 0.07, delayChildren: 0.2 } }
+    closed: { 
+      opacity: 0, 
+      clipPath: "inset(0 0 100% 0)",
+      transition: { staggerChildren: 0.05, staggerDirection: -1 } 
+    },
+    open: { 
+      opacity: 1, 
+      clipPath: "inset(0 0 0% 0)",
+      transition: { 
+        type: "spring",
+        stiffness: 80,
+        damping: 20,
+        staggerChildren: 0.1, 
+        delayChildren: 0.1 
+      } 
+    }
   };
 
   const mobileItemVariants: Variants = {
-    closed: { x: -20, opacity: 0 },
-    open: { x: 0, opacity: 1 }
-  };
-
-  // Reusable bouncing arrow animation
-  const bounceTransition: Transition = {
-    x: {
-      duration: 0.8,
-      repeat: Infinity,
-      repeatType: "reverse",
-      ease: "easeInOut"
-    }
+    closed: { y: 20, opacity: 0 },
+    open: { y: 0, opacity: 1 }
   };
 
   return (
     <>
       {/* --- DESKTOP HEADER --- */}
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: isVisible ? 0 : -100 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-        className={`hidden md:block fixed top-0 left-0 right-0 z-50 w-full transition-colors duration-500 ease-in-out border-b ${
-          sticky 
-            ? 'bg-black/60 backdrop-blur-xl border-white/10 shadow-lg shadow-black/20' 
-            : 'bg-transparent border-transparent'
-        }`}
+      <header
+        className={`hidden md:flex fixed top-0 left-0 right-0 z-50 justify-center items-center w-full pt-6 pointer-events-none`}
       >
-        <div className="max-w-7xl mx-auto px-8 h-[80px] flex items-center justify-between">
-          
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0 cursor-pointer group">
-            <div className="relative">
+        <div className={`pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full transition-all duration-500 border ${
+          scrolled 
+            ? 'w-[90%] max-w-6xl bg-black/60 backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)]' 
+            : 'w-full max-w-7xl bg-transparent border-transparent'
+        }`}>
+          {/* Logo Section */}
+          <Link href="/" className="flex-shrink-0 cursor-pointer group relative z-10">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Image 
                 src="/images/logo.png" 
                 alt="Logo" 
-                width={140}
-                height={40}
-                className="h-10 w-auto object-contain transition-all duration-300 group-hover:brightness-125" 
+                width={180} 
+                height={50}
+                className="h-12 w-auto object-contain brightness-110" 
                 priority
               />
-            </div>
+            </motion.div>
           </Link>
 
-          {/* Centered Navigation Pills */}
-          <nav className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="flex items-center p-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-inner">
+          {/* Centered Navigation */}
+          <nav className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
+            <ul className="flex items-center gap-1 p-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm">
               {currentMenuItems.map((item) => {
-                const isActive = isItemActive(item);
+                const isActive = activeSection === item.title;
                 return (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    onClick={(e) => handleLinkClick(e, item)}
-                    className={`relative px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 cursor-pointer ${
-                      isActive ? 'text-white' : 'text-white/60 hover:text-white'
-                    } ${item.isButton ? 'font-bold tracking-wide' : ''}`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-pill"
-                        className={`absolute inset-0 rounded-full shadow-sm border border-white/5 ${item.isButton ? 'bg-blue-600/80' : 'bg-white/10'}`}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">{item.title}</span>
-                  </Link>
+                  <li key={item.title}>
+                    <Link
+                      href={item.href}
+                      onClick={(e) => handleLinkClick(e, item)}
+                      className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 block ${
+                        isActive ? 'text-white' : 'text-white/60 hover:text-white'
+                      } ${item.isButton ? 'ml-2' : ''}`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="active-pill"
+                          className={`absolute inset-0 rounded-full ${
+                            item.isButton ? 'bg-blue-600 shadow-lg shadow-blue-500/30' : 'bg-white/10'
+                          }`}
+                          transition={transitionSpring}
+                        />
+                      )}
+                      {item.isButton && !isActive && (
+                         <div className="absolute inset-0 rounded-full border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-colors" />
+                      )}
+                      <span className="relative z-10">{item.title}</span>
+                    </Link>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </nav>
 
-          {/* Toggle Switch */}
-          <div className="flex-shrink-0">
-            <div className="group flex items-center gap-4 bg-black/40 backdrop-blur-md rounded-full p-1.5 pl-5 border border-white/5 hover:border-white/20 transition-all duration-300 hover:shadow-glow">
-              
-              <div className="flex flex-col items-end mr-1 overflow-hidden h-5">
-                <AnimatePresence mode="wait">
-                  <motion.div 
-                    key={isDeveloperMode ? "dev" : "content"}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -20, opacity: 0 }}
-                    className="flex items-center gap-2 text-xs font-semibold tracking-wide text-white/80"
-                  >
-                     {/* Desktop Arrow Animation */}
-                    <span>{isDeveloperMode ? "Switch to Content" : "Switch to Dev"}</span>
-                    <motion.span
-                        animate={{ x: [0, 4, 0] }}
-                        transition={bounceTransition}
-                    >
-                         <ArrowRight size={12} className="text-blue-400" />
-                    </motion.span>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-              
-              <button
-                onClick={handleToggle}
-                className={`relative w-14 h-8 rounded-full p-1 transition-colors duration-500 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
-                  isSwitching ? 'bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/10 hover:bg-white/20 shadow-inner'
-                }`}
+          {/* Right Section: Toggle */}
+          <div className="flex-shrink-0 flex items-center gap-6 z-10">
+            <div className="hidden xl:flex flex-col items-end overflow-hidden h-5">
+               <AnimatePresence mode="wait">
+                 <motion.span 
+                   key={isDeveloperMode ? "dev-txt" : "cont-txt"}
+                   initial={{ y: 15, opacity: 0 }}
+                   animate={{ y: 0, opacity: 1 }}
+                   exit={{ y: -15, opacity: 0 }}
+                   className="text-xs font-bold uppercase tracking-wider text-white/50"
+                 >
+                   {isDeveloperMode ? "Switch to Content" : "Switch to Dev"}
+                 </motion.span>
+               </AnimatePresence>
+            </div>
+
+            <motion.button
+              onClick={handleToggle}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`relative w-16 h-9 rounded-full p-1 cursor-pointer transition-colors duration-500 border ${
+                 isSwitching 
+                  ? 'bg-blue-600 border-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.4)]' 
+                  : 'bg-white/10 border-white/10 hover:border-white/20'
+              }`}
+            >
+              <motion.div
+                className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center relative z-10"
+                animate={{ x: isSwitching ? 28 : 0 }} 
+                transition={bouncySpring}
               >
                 <motion.div
-                  className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center"
-                  animate={{ x: isSwitching ? 24 : 0 }} 
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                   animate={{ rotate: isSwitching ? 360 : 0, scale: isSwitching ? 0.8 : 1 }}
+                   transition={{ duration: 0.5 }}
                 >
-                  <motion.div
-                    animate={{ rotate: isSwitching ? 360 : 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {isSwitching ? (
-                      isDeveloperMode ? <Palette size={12} className="text-blue-600" /> : <Code2 size={12} className="text-blue-600" />
-                    ) : (
-                      isDeveloperMode ? <Palette size={12} className="text-gray-700" /> : <Code2 size={12} className="text-gray-700" />
-                    )}
-                  </motion.div>
+                  {isDeveloperMode ? (
+                     <Palette size={14} className={isSwitching ? "text-blue-600" : "text-gray-800"} />
+                  ) : (
+                     <Code2 size={14} className={isSwitching ? "text-blue-600" : "text-gray-800"} />
+                  )}
                 </motion.div>
-              </button>
-            </div>
+              </motion.div>
+            </motion.button>
           </div>
         </div>
-        
-        {/* Subtle Bottom Gradient Line */}
-        <motion.div 
-          className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1.5 }}
-        />
-      </motion.header>
+      </header>
+
 
       {/* --- MOBILE HEADER --- */}
       <div className="md:hidden">
-        <motion.header
-          className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center transition-all duration-300"
-          animate={{
-            y: isVisible ? 0 : -100,
-            backgroundColor: (sticky || mobileMenuOpen) ? 'rgba(0,0,0,0.85)' : 'transparent',
-            backdropFilter: (sticky || mobileMenuOpen) ? 'blur(20px)' : 'none',
-          }}
-          transition={{ duration: 0.4 }}
+        <div
+          className={`fixed top-0 left-0 right-0 z-[60] px-6 py-4 flex justify-between items-center transition-all duration-300 ${
+             scrolled || mobileMenuOpen ? 'bg-black/80 backdrop-blur-xl border-b border-white/5' : 'bg-transparent'
+          }`}
         >
-          <Link href="/" className="z-50 relative cursor-pointer">
+          <Link href="/" className="relative z-[60]">
              <Image 
                src="/images/logo.png" 
                alt="Logo" 
-               width={120} 
-               height={32}
-               className="h-8 w-auto object-contain" 
+               width={140} 
+               height={40}
+               className="h-10 w-auto object-contain" 
              />
           </Link>
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="relative z-50 w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer active:scale-90 transition-transform"
+            className="relative z-[60] w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
           >
-             <svg width="22" height="22" viewBox="0 0 24 24">
-              <Path
-                variants={{
-                  closed: { d: 'M 4 6 L 20 6' },
-                  open: { d: 'M 6 18 L 18 6' },
-                }}
-                initial="closed"
-                animate={mobileMenuOpen ? 'open' : 'closed'}
-              />
-              <Path
-                d="M 4 12 L 20 12"
-                variants={{
-                  closed: { opacity: 1 },
-                  open: { opacity: 0 },
-                }}
-                initial="closed"
-                animate={mobileMenuOpen ? 'open' : 'closed'}
-              />
-              <Path
-                variants={{
-                  closed: { d: 'M 4 18 L 20 18' },
-                  open: { d: 'M 6 6 L 18 18' },
-                }}
-                initial="closed"
-                animate={mobileMenuOpen ? 'open' : 'closed'}
-              />
-            </svg>
+            <motion.div
+                animate={mobileMenuOpen ? "open" : "closed"}
+                className="relative w-6 h-6"
+            >
+               <motion.span 
+                 className="absolute inset-0 flex items-center justify-center"
+                 initial={{ opacity: 1, rotate: 0 }}
+                 animate={{ opacity: mobileMenuOpen ? 0 : 1, rotate: mobileMenuOpen ? 90 : 0 }}
+               >
+                   <Menu />
+               </motion.span>
+               <motion.span 
+                 className="absolute inset-0 flex items-center justify-center"
+                 initial={{ opacity: 0, rotate: -90 }}
+                 animate={{ opacity: mobileMenuOpen ? 1 : 0, rotate: mobileMenuOpen ? 0 : -90 }}
+               >
+                   <X />
+               </motion.span>
+            </motion.div>
           </button>
-        </motion.header>
+        </div>
 
-        {/* Mobile Full Screen Menu */}
+        {/* Mobile Full Screen Menu Overlay */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -348,79 +340,61 @@ const Header = () => {
               initial="closed"
               animate="open"
               exit="closed"
-              className="fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl flex flex-col pt-28 px-6 pb-10 overflow-hidden"
+              className="fixed inset-0 z-50 bg-[#050505] flex flex-col pt-32 px-6 pb-10 h-[100dvh]"
             >
-              {/* Navigation Links */}
-              <nav className="flex flex-col space-y-3">
+               <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
+               <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-purple-600/10 rounded-full blur-[80px] pointer-events-none" />
+
+              <nav className="flex flex-col space-y-2 relative z-10">
                 {currentMenuItems.map((item, idx) => (
-                  <motion.div variants={mobileItemVariants} key={idx}>
+                  <motion.div variants={mobileItemVariants} key={idx} className="overflow-hidden">
                     <Link
                       href={item.href}
                       onClick={(e) => handleLinkClick(e, item)}
-                      className={`group flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer ${
-                        isItemActive(item) 
-                          ? 'bg-white/10 border-white/20 shadow-lg' 
-                          : 'bg-white/5 border-white/5 hover:bg-white/10'
+                      className={`group flex items-center justify-between py-4 border-b border-white/5 transition-all cursor-pointer ${
+                        activeSection === item.title ? 'text-white' : 'text-white/40'
                       }`}
                     >
-                      <span className={`text-xl font-medium tracking-wide ${isItemActive(item) ? 'text-white' : 'text-white/60 group-hover:text-white'}`}>
+                      <span className="text-3xl font-light tracking-tight group-hover:pl-4 transition-all duration-300">
                         {item.title}
                       </span>
-                      <ChevronRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white' : 'text-white/30'}`} />
+                      <motion.div
+                         initial={{ x: -10, opacity: 0 }}
+                         whileInView={{ x: 0, opacity: 1 }}
+                         className={activeSection === item.title ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity"}
+                      >
+                         <ArrowRight className="w-6 h-6 -rotate-45" />
+                      </motion.div>
                     </Link>
                   </motion.div>
                 ))}
               </nav>
 
-              {/* Bottom Controls */}
-              <div className="mt-auto space-y-6">
-                
-                {/* Mobile Toggle */}
+              <div className="mt-auto space-y-8 relative z-10">
+                {/* Mobile Switcher */}
                 <motion.div 
                   variants={mobileItemVariants}
-                  className="p-1.5 rounded-2xl bg-white/5 border border-white/10"
+                  onClick={handleToggle}
+                  className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-transform"
                 >
-                  <button 
-                    onClick={handleToggle}
-                    className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 border border-white/5 transition-all cursor-pointer group"
-                  >
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors border border-white/10 ${
-                        isDeveloperMode ? 'bg-blue-600/20 text-blue-400' : 'bg-white/10 text-white/50'
-                      }`}>
-                          {isDeveloperMode ? <Palette size={20} /> : <Code2 size={20} />}
-                      </div>
-                      <span className="text-sm font-medium text-white/90">
-                          {isDeveloperMode ? "Switch to Content" : "Switch to Dev"}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                        {/* Mobile Arrow Animation (Side of Toggle) */}
-                        <motion.div
-                            animate={{ x: [0, 5, 0] }}
-                            transition={bounceTransition}
-                            className="text-blue-400"
-                        >
-                            <ArrowRight size={16} />
-                        </motion.div>
-
-                        {/* Animated Mobile Knob */}
-                        <div className={`w-14 h-7 rounded-full p-1 transition-colors duration-300 ${isSwitching ? 'bg-blue-600' : 'bg-white/20'}`}>
-                        <motion.div 
-                            className="w-5 h-5 bg-white rounded-full shadow-md"
-                            animate={{ x: isSwitching ? 28 : 0 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        />
+                        <div className={`p-3 rounded-full ${isDeveloperMode ? 'bg-blue-600/20 text-blue-400' : 'bg-purple-600/20 text-purple-400'}`}>
+                             {isDeveloperMode ? <Code2 size={24} /> : <Palette size={24} />}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xs text-white/40 uppercase tracking-widest">Current Mode</span>
+                            <span className="text-lg font-medium text-white">{isDeveloperMode ? "Developer" : "Creative"}</span>
                         </div>
                     </div>
-                  </button>
+                    <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center">
+                         <ChevronRight size={16} />
+                    </div>
                 </motion.div>
 
-                {/* Social Icons */}
+                {/* Socials */}
                 <motion.div 
                   variants={mobileItemVariants}
-                  className="flex justify-center items-center space-x-10 pt-6 border-t border-white/10"
+                  className="flex justify-between items-center px-4"
                 >
                   {[
                     { Icon: Instagram, href: "https://instagram.com" },
@@ -432,9 +406,9 @@ const Header = () => {
                       href={social.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-white/50 hover:text-white hover:scale-110 transition-all duration-300 cursor-pointer p-2"
+                      className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"
                     >
-                      <social.Icon size={26} strokeWidth={1.5} />
+                      <social.Icon size={24} />
                     </a>
                   ))}
                 </motion.div>

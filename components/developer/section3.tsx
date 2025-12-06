@@ -145,12 +145,7 @@ export default function SelectedWorks() {
           <div className="w-full lg:w-7/12 order-1 lg:order-2">
             <div className="relative h-[350px] sm:h-[450px] md:h-[500px] lg:h-[650px] w-full rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-b from-white/5 to-black border border-white/10 shadow-2xl">
               
-              {/* Decorative Dots */}
-              <div className="absolute top-4 left-4 z-20 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-red-500"></div>
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500"></div>
-              </div>
+           
 
               {/* Loader Overlay */}
               <div 
